@@ -1,5 +1,5 @@
 # SoloTrack - Management Platform for Solo Entrepreneurs
-![SoloTrack logo] (public\images\LOGO.png)
+![SoloTrack logo](public/images/LOGO.png)
 A comprehensive web-based management platform designed specifically for auto-entrepreneurs (solo entrepreneurs) to streamline their business operations and administrative tasks.
 
 ## 📋 Project Overview
