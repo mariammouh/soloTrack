@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <link rel="shortcut icon" href="images/favicon.png" type="">
+
+  <title> Solo Track </title>
+
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!--owl slider stylesheet -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+
+  <!-- font awesome style -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" />
+
+  <!-- Custom styles for this template -->
+  <link href="css/style.css" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="css/responsive.css" rel="stylesheet" />
+
+</head>
+
+<body class="sub_page">
+
+  <div class="hero_area">
+
+    <div class="hero_bg_box">
+      <div class="bg_img_box">
+        <img src="images/hero-bg.png" alt="">
+      </div>
+    </div>
+
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="{{route('home')}}">            <span>
+              <img src="images/logo1.png" height="40" width="40"   alt=""><span  >OLO TRACK</span>
+
+            </span>
+          </a>
+
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class=""> </span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav  ">
+              <li class="nav-item ">
+                <a class="nav-link" href="{{route('home')}}">ACCUEIL<span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{route('about')}}">À PROPOS</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="{{route('service')}}">SERVICES</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{route('why')}}">POURQUOI NOUS</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{route('team')}}">ÉQUIPE</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{route('login')}}"> <i class="fa fa-user" aria-hidden="true"></i>   CONNEXION</a>
+              </li>
+              <form class="form-inline">
+                <!-- <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button> -->
+              </form>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+  </div>
+
+
+  <!-- service section -->
+  <section class="service_section layout_padding">
+    <div class="service_container">
+        <div class="container">
+            <div class="heading_container heading_center">
+                <h2>
+                    Nos <span>Services</span>
+                </h2>
+                <p>
+                    Notre site propose divers services pour les autoentrepreneurs afin de les aider dans leur activité professionnelle.
+                </p>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/customer.png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                GESTION DES CLIENTS
+                            </h5>
+                            <p>
+                                Simplifiez la gestion de vos clients en centralisant toutes leurs informations au même endroit. Suivez leurs coordonnées, historiques d'achat et préférences pour offrir un service personnalisé et efficace, tout en renforçant vos relations clientèle.
+                            </p>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/box.png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                Gérer les produits et le stock
+                            </h5>
+                            <p>
+                                Optimisez la gestion de votre inventaire en suivant les produits, les fournisseurs et les niveaux de stock. Notre système vous permet également de surveiller les mouvements d'inventaire pour une gestion proactive.
+                            </p>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/project-management.png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                Gérer votre inventaire
+                            </h5>
+                            <p>
+                                Simplifiez la gestion de votre inventaire avec notre système intuitif, facilitant le suivi des inventaires et la planification des achats. Grâce à notre plateforme, vous pouvez gérer votre inventaire de manière efficace et optimiser vos opérations d'achat.
+                            </p>
+                         
+                        </div>
+                    </div>
+                </div>
+                <!-- Nouveaux services ajoutés -->
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/supplier.png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                GESTION DES FOURNISSEURS
+                            </h5>
+                            <p>
+                                Gérez efficacement vos fournisseurs en suivant leurs informations, leurs produits et leurs tarifs. Simplifiez la collaboration avec vos fournisseurs pour une meilleure gestion des achats et des approvisionnements.
+                            </p>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/bill (1).png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                GESTION DES FACTURES
+                            </h5>
+                            <p>
+                                Automatisez la création, l'envoi et le suivi de vos factures. Simplifiez la gestion des paiements et des rappels pour un meilleur contrôle financier de votre entreprise.
+                            </p>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="img-box">
+                            <img src="images/process.png" alt="">
+                        </div>
+                        <div class="detail-box">
+                            <h5>
+                                Configurer les paramètres globaux
+                            </h5>
+                            <p>
+                                Personnalisez votre application en configurant les paramètres globaux selon vos besoins. Définissez les préférences utilisateur, les options de sécurité et les paramètres de système pour une expérience personnalisée et sécurisée.
+                            </p>
+                          
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-box">
+              <a href="{{route('register')}}" class="btn1">
+                Comencez
+              </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+  <!-- end service section -->
+
+  <!-- info section -->
+  <section class="info_section layout_padding2">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 col-lg-3 info_col">
+          <div class="info_contact">
+            <h4>
+              Adresse
+            </h4>
+            <div class="contact_link_box">
+              <a href="">
+                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                <span>
+                  Avenue Ghandi Imm 70 2ème Etage NR 7, Agadir 80000, Agadir
+                </span>
+              </a>
+              <a href="">
+                <i class="fa fa-phone" aria-hidden="true"></i>
+                <span>
+                  Appel +212 709764534
+                </span>
+              </a>
+              <a href="">
+                <i class="fa fa-envelope" aria-hidden="true"></i>
+                <span>
+                  Contact@SoloTrack.com
+                </span>
+              </a>
+            </div>
+          </div>
+          <div class="info_social">
+            <a href="">
+              <i class="fa fa-facebook" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-twitter" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-linkedin" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa fa-instagram" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 info_col">
+          <div class="info_detail">
+            <h4>
+              Info
+            </h4>
+            <p>
+              Une application de gestion conçue spécialement pour les autoentrepreneurs, vous permettant de gérer facilement vos factures, suivre vos clients, et organiser vos tâches. L'outil parfait pour simplifier la gestion de votre entreprise.            </p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-2 mx-auto info_col">
+          <div class="info_link_box">
+            <h4>
+              Liens
+            </h4>
+            <div class="info_links">
+              <a class="active" href="index.html">
+                Accueil
+              </a>
+              <a class="" href="about.html">
+                À Propos
+              </a>
+              <a class="" href="service.html">
+                Services
+              </a>
+              <a class="" href="why.html">
+                Pourquoi Nous
+              </a>
+              <a class="" href="team.html">
+                Équipe
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 info_col ">
+          <h4>
+            Abonnez-vous
+          </h4>
+          <form action="#">
+            <input type="text" placeholder="Entrez votre email" />
+            <button type="submit">
+              S'abonner
+            </button>
+          </form>
+        </div>
+      </div>
+      <section class="footer_section">
+      <div class="container">
+      <p>
+        &copy; <span id="displayYear"></span> Tous les droits sont réservés par
+        <a href="https://html.design/">Solo track</a>
+      </p></div></section>
+    </div>
+  </section>
+  <!-- footer section -->
+
+  <!-- jQery -->
+  <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+  <!-- popper js -->
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+  </script>
+  <!-- bootstrap js -->
+  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <!-- owl slider -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js">
+  </script>
+  <!-- custom js -->
+  <script type="text/javascript" src="js/custom.js"></script>
+  <!-- Google Map -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCh39n5U-4IoWpsVGUHWdqB6puEkhRLdmI&callback=myMap">
+  </script>
+  <!-- End Google Map -->
+
+</body>
+
+</html>

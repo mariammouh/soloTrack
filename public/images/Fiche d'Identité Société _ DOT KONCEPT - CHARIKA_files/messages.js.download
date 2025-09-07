@@ -1,0 +1,82 @@
+var messages = {
+erreur_serveur : "une erreur est survenue sur le serveur lors du traitement",
+
+page_contact_validation_email: "Saisissez un email valid",
+page_contact_validation_email_required: "Saisissez un email",
+page_contact_validation_message_minlength: "Votre message doit avoir au moins 100 caractères",
+page_contact_validation_message_required: "Saisissez un message",
+page_contact_validation_objet_minlength: "L'objet du message doit avoir au moins 10 caractères",
+page_contact_validation_objet_required: "Saisissez l'objet de votre message",
+
+page_ice_validation_nom_required: "Saisissez votre nom",
+page_ice_validation_email: "Saisissez un email valid",
+page_ice_validation_email_required: "Saisissez votre email",
+page_ice_validation_societe_required: "Saisissez le nom de votre société",
+page_ice_validation_telephone_required: "Saisissez votre numéro de téléphone",
+page_ice_validation_telephone_minlength: "Le téléphone doit avoir au moins 10 caractères",
+
+page_commande_fichier_palmares_validation_nom_required: "Saisissez votre nom",
+page_commande_fichier_palmares_validation_email: "Saisissez un email valid",
+page_commande_fichier_palmares_validation_email_required: "Saisissez votre email",
+page_commande_fichier_palmares_validation_societe_required: "Saisissez le nom de votre société",
+page_commande_fichier_palmares_validation_telephone_required: "Saisissez votre numéro de téléphone",
+page_commande_fichier_palmares_validation_telephone_minlength: "Le téléphone doit avoir au moins 10 caractères",
+
+page_publicite_validation_nom_required: "Saisissez votre nom",
+page_publicite_validation_email: "Saisissez un email valid",
+page_publicite_validation_email_required: "Saisissez votre email",
+page_publicite_validation_societe_required: "Saisissez le nom de votre société",
+page_publicite_validation_telephone_required: "Saisissez votre numéro de téléphone",
+page_publicite_validation_telephone_minlength: "Le téléphone doit avoir au moins 10 caractères",
+page_publicite_validation_message_required: "Saisissez votre message",
+page_publicite_validation_message_minlength: "Votre message doit avoir au moins 10 caractères",
+
+page_duntrade_validation_nom_required: "Saisissez votre nom",
+page_duntrade_validation_email: "Saisissez un email valid",
+page_duntrade_validation_email_required: "Saisissez votre email",
+page_duntrade_validation_societe_required: "Saisissez le nom de votre société",
+page_duntrade_validation_telephone_required: "Saisissez votre numéro de téléphone",
+page_duntrade_validation_telephone_minlength: "Le téléphone doit avoir au moins 10 caractères",
+page_duntrade_validation_message_required: "Saisissez votre message",
+page_duntrade_validation_message_minlength: "Votre message doit avoir au moins 50 caractères",
+page_duntrade_validation_secteur_required: "Saisissez le secteur",
+page_duntrade_validation_fonction_required: "Saisissez la fonction",
+
+
+page_panier_suppression_rapport_success : "Le rapport a bien &eacute;t&eacute; supprim&eacute; de la  commande.",
+page_panier_suppression_rapport_failed : "Rapport inexistant dans le panier. Cette page va être réactualisée...",
+page_panier_confirmation_suppression_rapport_message1 : "Voulez-vous vraiment supprimer ce rapport de votre commande?",
+page_panier_confirmation_suppression_rapport_message2 : "Merci de confirmer la suppression.",
+page_panier_validation_email: "Saisissez un email valid",
+page_panier_validation_email_required: "Saisissez votre email",
+page_panier_validation_email_check: "Cet email est déjà utilisé",
+page_panier_email_update : "Mise à jour effectu&eacute;e avec succès.",
+
+
+page_adresse_facturation_suppression_success : "L'adresse a été supprimé avec succès",
+page_adresse_facturation_suppression_failed : "Désolé, la suppression de l'adresse a échoué.",
+page_adresse_facturation_confirmation_suppression_message1 : "Voulez-vous vraiment supprimer cette adresse de facturation?",
+page_adresse_facturation_confirmation_suppression_message2 : "Merci de confirmer la suppression.",
+page_adresse_facturation_creation_success : "Adresse de facturation créée avec succès.",
+page_adresse_facturation_creation_failed : "Échec sur la création de l'adresse de facturation.",
+page_adresse_facturation_edition_success : "Adresse de facturation éditée avec succès.",
+page_adresse_facturation_edition_failed : "Échec sur l'édition de l'adresse de facturation.",
+
+page_utilisateur_profil_update : "Mise à jour effectu&eacute;e avec succès.",
+page_utilisateur_profil_validation_email: "Saisissez un email valid",
+page_utilisateur_profil_validation_email_required: "Saisissez votre email",
+page_utilisateur_profil_validation_email_check: "Cet email est déjà utilisé",
+
+page_modification_motdepasse_utilisateur_reset : "Votre mot de passe a bien &eacute;t&eacute; r&eacute;initialis&eacute",
+page_modification_motdepasse_utilisateur_save_success : "Mot de passe modifi&eacute; avec succès",
+page_modification_motdepasse_utilisateur_save_failed : "Mot de passe actuel incorrect",
+page_modification_motdepasse_utilisateur_validation_oldpassword_required: "Entrez l'ancien mot de passe",
+page_modification_motdepasse_utilisateur_validation_oldpassword_equalTo: "Le mot de passe que vous avez tapé est incorrect",
+page_modification_motdepasse_utilisateur_validation_newpassword_required: "Entrez un mot de passe",
+page_modification_motdepasse_utilisateur_validation_passwordconfirm_required: "Confirmez le mot de passe",
+page_modification_motdepasse_utilisateur_validation_passwordconfirm_equalTo: "Retapez le même mot de passe",
+
+
+
+
+};

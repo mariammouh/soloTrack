@@ -1,0 +1,88 @@
+[class$="icon-"]:before,[class*="icon- "]:before{font-family:"fontello";font-style:normal;font-weight:400;speak:none;display:inline-block;text-decoration:inherit;width:1em;margin-right:.2em;text-align:center;font-variant:normal;text-transform:none;line-height:1em;margin-left:.2em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.uploadicon-:before{content:'\e804'}
+.linkedinicon-:before{content:'\e808'}
+.locationicon-:before{content:'\e80a'}
+.printicon-:before{content:'\e80b'}
+.comment-emptyicon-:before{content:'\e80d'}
+.basketicon-:before{content:'\e80e'}
+.searchicon-:before{content:'\e810'}
+.globeicon-:before{content:'\e811'}
+.calendaricon-:before{content:'\e812'}
+.down-circledicon-:before{content:'\e813'}
+.pencilicon-:before{content:'\e817'}
+.commenticon-:before{content:'\e81b'}
+.mailicon-:before{content:'\e81c'}
+.folder-openicon-:before{content:'\e820'}
+.moneyicon-:before{content:'\e821'}
+.usericon-:before{content:'\e822'}
+.officon-:before{content:'\e825'}
+.facebookicon-:before{content:'\e82d'}
+.linkicon-:before{content:'\e830'}
+.help-circledicon-:before{content:'\e831'}
+.cog-alticon-:before{content:'\e837'}
+.twittericon-:before{content:'\e838'}
+.hammericon-:before{content:'\e83a'}
+.attentionicon-:before{content:'\e83e'}
+.loginicon-:before{content:'\e83f'}
+.right-bigicon-:before{content:'\e840'}
+.staricon-:before{content:'\e845'}
+.right-diricon-:before{content:'\e849'}
+.awardicon-:before{content:'\e84b'}
+.phoneicon-:before{content:'\e84f'}
+.mail-alticon-:before{content:'\e850'}
+.gplusicon-:before{content:'\e855'}
+.plusicon-:before{content:'\e858'}
+.eyeicon-:before{content:'\e859'}
+.qrcodeicon-:before{content:'\e85c'}
+.okicon-:before{content:'\e871'}
+.thumbs-upicon-:before{content:'\e887'}
+.up-bigicon-:before{content:'\e8bc'}
+.megaphoneicon-:before{content:'\e8f8'}
+.list-bulleticon-:before{content:'\f0ca'}
+.angle-downicon-:before{content:'\f107'}
+.ellipsisicon-:before{content:'\f141'}
+.doc-text-invicon-:before{content:'\f15c'}
+.yahooicon-:before{content:'\f19e'}
+.faxicon-:before{content:'\f1ac'}
+.paper-planeicon-:before{content:'\f1d8'}
+.newspapericon-:before{content:'\f1ea'}
+.user-plusicon-:before{content:'\f234'}
+.address-book-oicon-:before{content:'\f2ba'}
+.user-circle-oicon-:before{content:'\f2be'}
+.popover-title{height:0}
+#user{float:right;color:#FFF;margin-right:0}
+.joyride-tip-guide{margin-left:16px}
+.notif-societe{display:inline-block;color:#2790B0;margin-right:7px;font-size:15px}
+.notif-societe a{text-decoration:none}
+.notif-societe .edit,.notif-societe .delete{display:inline-block;text-decoration:underline;color:#aaa;margin-left:10px}
+.notif-societe a:first-child{margin:0}
+table{line-height:2.3}
+.widthperso{width:12%}
+.widthperso3{width:65%}
+#table-liste-rapport-fiche .pair{border-bottom:1px solid #eee;border-width:1px 0}
+.societe-top.NsPalmares .ligne-palmares-rang .rang{line-height:7px;font-size:22px!important;font-weight:700}
+.societe-top.NsPalmares .container-rang{margin-left:-14px!important}
+.ligne-resultat h5{margin:0 0 1px!important}
+.box_general.write_review{background:#fff;padding:0;margin-top:0}
+.informations-entreprise td{padding:7px 10px!important}
+.row.ligne-tfmw.col-md-6{width:100%;padding:0}
+.presentation-edition{display:none}
+.form-presentation .form-control:focus{border-color:none;box-shadow:none}
+.form-presentation .form-control[type='text']{height:25px}
+.form-presentation .form-control{padding:3px 6px;font-size:12.6px;border-radius:0;box-shadow:none}
+.form-presentation .panel-body .presentation-consultation{line-height:1.7em}
+.carousel-inner .media-action{position:absolute;right:10px;top:-50px;z-index:111}
+.carousel-inner .active:HOVER .media-action,.carousel-inner .active:HOVER .media-action:HOVER{top:10px}
+.popover-title{display:none}
+.iziModal .iziModal-header{padding:8px 0 0 18px}
+#modal-gestion-media .td-header{background-color:#333;color:#EEE;font-size:2em;border-bottom:1px solid #000}
+#modal-gestion-media .td-sub-header{background-color:#DDD;color:#222;font-size:1.5em;border-bottom:1px solid #000;border-right:1px dotted #777}
+#modal-gestion-media .center-zone{width:400px;padding:10px;border-right:1px dotted #777;vertical-align:top}
+.toolbox{text-align:left;padding-left:40px;padding-bottom:10px}
+.td-preview-wrap{width:200px;padding:10px}
+.gestion-media{height:400px}
+.gestion-media-upload-area{padding:10px;margin-top:10px;text-align:center}
+.gestion-media-upload-area img{max-height:400px;max-width:400px}
+.upload-media-img{cursor:pointer}
+.media-height{height:280px}
+.form-media .h_wrapper{width:80%}

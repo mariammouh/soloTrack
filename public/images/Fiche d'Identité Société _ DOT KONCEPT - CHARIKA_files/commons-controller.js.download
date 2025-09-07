@@ -1,0 +1,250 @@
+/*-------------- init notification/confirmation modal----------- */
+/* Instantiating iziModal */
+$("#modal-custom").iziModal({
+	overlayClose: false,
+	autoOpen: false,
+	overlayColor: 'rgba(0, 0, 0, 0.6)',
+	width: 431,
+	zindex: 1060,
+	iframeHeight: 222
+});
+
+var showConfirmationPopup = function(title, message, callbackFn) {
+	$('#modal-custom .confirmation-container .title').html(title);
+	$('#modal-custom .confirmation-container .message').html(message);
+	$('#modal-custom').iziModal('open');
+
+	$("#modal-custom .submit").off().on("click", function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		
+		callbackFn();
+
+		$('#modal-custom').iziModal('close');
+	});
+}
+
+
+var showLargeNotificationPopup = function (title){
+	var color="#28a745";
+	var icon="doc-text-invicon-";
+	
+	$('#modal-alert').iziModal('destroy');
+	$('#modal-alert').remove();
+	$("#modal-alert").iziModal({
+	    title: title,
+	    icon: icon,
+	    headerColor: color,
+	    width: "30%",
+	    timeout: 5000,
+	    timeoutProgressbar: true,
+	    transitionIn: 'fadeInDown',
+	    transitionOut: 'fadeOutUp',
+	    top: "3%",
+		zindex: 9999,
+	    loop: true,
+		autoOpen: true,
+	    pauseOnHover: true
+	});
+}
+
+var showNotificationPopup = function(type, message, withAjaxIcon) {
+	toastr.options.closeButton = true;
+	toastr.options.toastClass = 'toast';
+	toastr.options.containerId = 'toast-container';
+	toastr.options.debug = false;
+	toastr.options.showMethod = 'fadeIn';
+	toastr.options.showDuration = 1000;
+	toastr.options.showEasing = 'swing';
+	toastr.options.hideMethod = 'fadeOut';
+	toastr.options.hideDuration = 5000;
+	toastr.options.hideEasing = 'swing';
+	toastr.options.extendedTimeOut = 1000;
+	toastr.options.positionClass = 'toast-bottom-right';
+	// toast-top-center, toast-bottom-center, toast-top-full-width
+	// toast-bottom-full-width, toast-top-left, toast-bottom-right
+	// toast-bottom-left, toast-top-right
+	toastr.options.timeOut = 5000;
+	toastr.options.titleClass = 'toast-title';
+	toastr.options.messageClass = 'toast-message';
+	toastr.options.escapeHtml = false;
+	toastr.options.target = 'body';
+	toastr.options.newestOnTop = true;
+	toastr.options.preventDuplicates = false;
+	toastr.options.progressBar = false;
+	//toastr.options.iconClass = 'toast-error',
+	toastr.options.onShown = function() {
+		if (withAjaxIcon)
+			$("#toast-container .toast").prepend($("<span class='ajax-loader-small'>"))
+	}
+
+	// Remove current toasts using animation
+	toastr.clear()
+
+	if (type == "error") {
+		toastr.error(message, "");
+	}
+	else if (type == "success") {
+		toastr.success(message, "");
+	}
+	else if (type == "warning") {
+		toastr.warning(message, "");
+	}
+	else if (type == "info") {
+		toastr.info(message, "");
+	}
+}
+
+var showNotificationPopupCustom = function(type, message, withAjaxIcon) {
+	toastr.options.closeButton = true;
+	toastr.options.toastClass = 'toast';
+	toastr.options.containerId = 'toast-container';
+	toastr.options.debug = false;
+	toastr.options.showMethod = 'fadeIn';
+	toastr.options.showDuration = 1000;
+	toastr.options.showEasing = 'swing';
+	toastr.options.hideMethod = 'fadeOut';
+	toastr.options.hideDuration = 10000;
+	toastr.options.hideEasing = 'swing';
+	toastr.options.extendedTimeOut = 1000;
+	toastr.options.positionClass = 'toast-bottom-right';
+	// toast-top-center, toast-bottom-center, toast-top-full-width
+	// toast-bottom-full-width, toast-top-left, toast-bottom-right
+	// toast-bottom-left, toast-top-right
+	toastr.options.timeOut = 10000;
+	toastr.options.titleClass = 'toast-title';
+	toastr.options.messageClass = 'toast-message';
+	toastr.options.escapeHtml = false;
+	toastr.options.target = 'body';
+	toastr.options.newestOnTop = true;
+	toastr.options.preventDuplicates = false;
+	toastr.options.progressBar = false;
+	//toastr.options.iconClass = 'toast-error',
+	toastr.options.onShown = function() {
+		if (withAjaxIcon)
+			$("#toast-container .toast").prepend($("<span class='ajax-loader-small'>"))
+	}
+
+	// Remove current toasts using animation
+	toastr.clear()
+
+	if (type == "error") {
+		toastr.error(message, "");
+	}
+	else if (type == "success") {
+		toastr.success(message, "");
+	}
+	else if (type == "warning") {
+		toastr.warning(message, "");
+	}
+	else if (type == "info") {
+		toastr.info(message, "");
+	}
+}
+
+//Feedback
+openModalFeedback ();
+closeModalFeedBack ();
+submitFormFeedback ();
+validateFormFeedback ();
+
+//Support
+openModalSupport ();
+closeModalSupport ();
+submitFormSupport ();
+validateFormSupport ();
+
+//NewsLetter
+openModalNewsLetter ();
+closeModalNewsLetter ();
+submitFormNewsLetter ();
+validateFormNewsLetter ();
+
+//popup connexion
+initConnexionPopup ();
+validateFormRegister ();
+submitFormRegister ();
+validateFormLogin ();
+submitFormLogin ();
+validateFormForgotPassword ();
+submitFormForgotPassword ();
+validateFormReactivation ();
+submitFormReactivation ();
+onClickLoginModalAuth ();
+onClickRegisterModalAuth ();
+onClickForgotPasswordModalAuth ();
+onClickReactivateModalAuth ();
+oncheckUncheckPrivacyPolicy ();
+
+//Menu Header Actions
+onClickBtnLogin ();
+onClickBtnRegister ();
+goToCartPage ();
+goToSurveillancePage ();
+goToProfilePage ();
+goToOrdersPage ();
+goToPortefeuillesPage ();
+goToFichierProspectsPage ();
+goToUserPositionnementPage();
+goToContributionsPage ();
+redirectToOrdersPage ();
+
+//Recherche header
+onClickBtnSearch ();
+onChangeCountrySearchHeader ();
+//onChangeSearchTypeHeader ();
+onSubmitSearchHeader ();
+validateFormSearchHeader ();
+
+//Menu notifs
+markAllNotifsAsRead ();
+viewNotifSource ();
+
+//Global Actions
+openReminderUpdateProfilePopup (466);
+closeReminderUpdateProfilePopup ();
+manageServerActions ();
+
+submitFormInternationlSearch ("form-recherche-internationale");
+validateFormInternationlSearch ("form-recherche-internationale");
+
+
+if (pageid == "service-rapports-entreprises"){
+	downloadReportExample ();
+}
+else if (pageid == "resultat-international"){
+	formatPhoneNumber("internationalPhone", "-");
+}
+else if (pageid == "international-accueil"){
+	downloadReportExample ();
+}
+else if (pageid == "service-fichier-prospect"){
+	goToServiceFichierProspects ();
+}
+
+$(document).ready(function() {
+	var key = 'hadModal',
+	hadModal = sessionStorage.getItem(key);
+	if (!hadModal) {
+		$("#nvannonce-modal").iziModal({
+		     overlayClose: false,
+		     autoOpen: true,
+		     overlayColor: 'rgba(0, 0, 0, 0.6)',
+		     width: 422,
+		     zindex: 1060,
+		     iframeHeight: 222,
+		     timeout: 10000,
+		     overlay:false,
+		     bottom: 5,
+		     timeoutProgressbar: true,
+		     transitionIn: 'fadeInRight',
+		     transitionOut: 'fadeOutRight'
+		});
+
+		sessionStorage.setItem(key, true);
+	}
+	$("body").on("click", "#nvannonce-modal .closebtn", function() {
+		$("#nvannonce-modal").modal("hide");
+	});
+
+});

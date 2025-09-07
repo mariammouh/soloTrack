@@ -1,0 +1,152 @@
+/*------------------------------------------------------------------
+Project:	Mosaic
+Version:	1.2
+Created: 		20/01/2014
+Last change:	27/02/2014
+-------------------------------------------------------------------*/
+
+/* ===== Sticky Navbar ===== */
+
+$(window).load(function() {
+	$(".navbar").sticky({ topSpacing: 0 });
+});
+
+/* ====== Search box toggle ===== */
+
+$("body").on("click", "#nav-search", function() {
+	$(this).toggleClass('show hidden');
+	$(this).removeClass('animated flipInX');
+	$("#nav-search-close").toggleClass('show hidden');
+	$("#nav-search-form").toggleClass('show hidden animated flipInX');
+	return false;
+});
+
+$("body").on("click", '#nav-search-close', function() {
+	$(this).toggleClass('show hidden');
+	$("#nav-search").toggleClass('show hidden animated flipInX');
+	$("#nav-search-form").toggleClass('show hidden animated flipInX');
+	return false;
+});
+
+/* Navbar dropdown link bug fix */
+
+$('.navbar-nav > li > a').hover(function() {
+	$(this).toggleClass("nav-hover-fix");
+	return false;
+});
+
+// Style Toggle
+// ============
+
+$("body").on("click", '.style-toggle-btn', function() {
+	$(".style-toggle").toggleClass("style-toggle-show");
+	$(this).toggleClass("cog-alticon- angle-double-righticon-");
+	return false;
+});
+
+// Navbar Style Change
+// =================
+
+$('body').on('change', '#opt-navbar-dark', function() {
+	$(".mini-navbar").addClass("mini-navbar-dark");
+	$(".mini-navbar").removeClass("mini-navbar-white");
+	$(".navbar").addClass("navbar-dark");
+	$(".navbar").removeClass("navbar-white");
+	return false;
+});
+
+$('body').on('change', '#opt-navbar-white', function() {
+	$(".mini-navbar").addClass("mini-navbar-white");
+	$(".mini-navbar").removeClass("mini-navbar-dark");
+	$(".navbar").addClass("navbar-white");
+	$(".navbar").removeClass("navbar-dark");
+	return false;
+});
+
+$('body').on('change', '#opt-navbar-mixed', function() {
+	$(".mini-navbar").addClass("mini-navbar-dark");
+	$(".mini-navbar").removeClass("mini-navbar-white");
+	$(".navbar").addClass("navbar-white");
+	$(".navbar").removeClass("navbar-dark");
+	return false;
+});
+
+// Footer Style Change
+// =================
+
+$('body').on('change', '#opt-footer-dark', function() {
+	$("footer").addClass("footer-dark");
+	$("footer").removeClass("footer-white");
+	return false;
+});
+
+$('body').on('change', '#opt-footer-white', function() {
+	$("footer").addClass("footer-white");
+	$("footer").removeClass("footer-dark");
+	return false;
+});
+
+// Body Style Change
+// =================
+
+$("body").on("click", '.style-toggle-body .colors > .green', function() {
+	$("body").addClass("body-green");
+	$("body").removeClass("body-blue");
+	$("body").removeClass("body-orange");
+	$("body").removeClass("body-red");
+	return false;
+});
+
+$("body").on("click", '.style-toggle-body .colors > .blue', function() {
+	$("body").addClass("body-blue");
+	$("body").removeClass("body-green");
+	$("body").removeClass("body-orange");
+	$("body").removeClass("body-red");
+	return false;
+});
+
+$("body").on("click", '.style-toggle-body .colors > .orange', function() {
+	$("body").addClass("body-orange");
+	$("body").removeClass("body-green");
+	$("body").removeClass("body-blue");
+	$("body").removeClass("body-red");
+	return false;
+});
+
+$("body").on("click", '.style-toggle-body .colors > .red', function() {
+	$("body").addClass("body-red");
+	$("body").removeClass("body-green");
+	$("body").removeClass("body-blue");
+	$("body").removeClass("body-orange");
+	return false;
+});
+
+/* ===== Lost password form ===== */
+
+$("body").on("click", '.pwd-lost > .pwd-lost-q > a', function() {
+	$(".pwd-lost > .pwd-lost-q").toggleClass("show hidden");
+	$(".pwd-lost > .pwd-lost-f").toggleClass("hidden show animated fadeIn");
+	return false;
+});
+
+/* ===== Sign Up popovers ===== */
+
+$(function() {
+	$('#name').popover();
+});
+
+$(function() {
+	$('#username').popover();
+});
+
+$(function() {
+	$('#email').popover();
+});
+
+$(function() {
+	$('#password').popover();
+});
+
+$(function() {
+	$('#repeat-password').popover();
+});

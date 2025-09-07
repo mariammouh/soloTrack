@@ -1,0 +1,1094 @@
+var loader = {
+	init: function(elt) {
+		loader.setVariables(elt);
+	},
+	setVariables: function(elt) {
+		loader.$loader = elt.parents(".custom-control-label").siblings(".loader");
+		loader.isLoading = false;
+		loader.currentTimeout = null;
+	},
+	//Startet lade Animation
+	load: function() {
+		if (this.currentTimeout != null) {
+			window.clearTimeout(this.currentTimeout);
+		}
+		loader.$loader.removeClass("success").removeClass("errorp");
+		loader.$loader.addClass("loading");
+		loader.isLoading = true;
+	},
+	//Startet success Animation
+	success: function() {
+		this.currentTimeout = window.setTimeout(function() {
+			loader.$loader
+				.removeClass("loading")
+				.addClass("success");
+			this.currentTimeout = window.setTimeout(loader.hide, 500);
+			loader.isLoading = false;
+		}, 100);
+
+	},
+	//Startet error Animation
+	error: function() {
+		this.currentTimeout = window.setTimeout(function() {
+			loader.$loader
+				.removeClass("loading")
+				.addClass("errorp");
+			this.currentTimeout = window.setTimeout(loader.hide, 500);
+			loader.isLoading = false;
+		}, 100);
+	},
+	hide: function() {
+		if (!loader.isLoading) {
+			// loader.$loader.removeClass("success").removeClass("errorp");
+			$(".loader").removeClass("success").removeClass("errorp").removeClass("loading");
+
+		}
+		this.currentTimeout = null;
+	}
+}
+function doDeleteSurveillance() {
+	$.ajax({
+		type: "POST",
+		url: "user-deletesurveillance",
+		data: "bilid=" + bilIdSurveille,
+		success: function(data) {
+			$(".mes-services").html(data);
+			$("input[name=offset]").val(1);
+			
+			var nbSurveillances = parseInt($("input[name=offset]").attr("nbSurveillances"))
+			
+			$("input[name=offset]").attr("nbSurveillances",nbSurveillances-1);
+			$(".nbSurveillances").html(nbSurveillances-1)			
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	}).always(function() { });
+}
+function doDeletePortefeuille() {
+	$.ajax({
+		type: "POST",
+		url: "user-supprimerPortefeuille",
+		data: "idPortefeuille=" + Idportefeuille,
+		success: function(data) {
+			$(".mes-portefeuilles").html(data);
+			notif = $(".nbNotifGlobalInput").val();
+			$(".nbNotifGlobal").html(notif - nbNotifPortefeuille);
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	}).always(function() { });
+}
+function doDeleteEntPortefeuille() {
+	$.ajax({
+		type: "POST",
+		url: "user-supprimerEntreprisePortefeuille",
+		data: "idPortefeuille=" + Idportefeuille + "&bilid=" + Idbil,
+		success: function(data) {
+			$(".mes-ent-portefeuilles").html(data);
+			notif = $(".nbNotifGlobalInput").val();
+			$(".nbNotifGlobal").html(notif - nbNotifEntreprise);
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	}).always(function() { });
+}
+function doCheckNomPortefeuille(nomPortefeuille) {
+	var result = false;
+	$.ajax({
+		url: 'user-checkNomPortefeuille',
+		method: 'post',
+		async: false,
+		data: { nomPortefeuille: nomPortefeuille },
+		dataType: 'json',
+		success: function(data) {
+			result = data.success;
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	});
+
+	return result;
+}
+function afficherListePortefeuilles() {
+	$.ajax({
+		type: "POST",
+		url: "societe-afficherPortefeuille",
+		data: "idbilportefeuille=" + bilId,
+		success: function(data) {
+			$(".mes-portefeuilles-fiche").html(data);
+			showModal("listPortefeuille-modal");
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	}).always(function() { });
+}
+function deleteSurveillance (){
+	$("body").on("click", ".delete-surveillance", function(e) {
+		e.preventDefault();
+	
+		// l'id du lien (picto ) de suppression
+		// est en fait l'ent_id de l'entreprise
+		// surveill&eacute;e
+		Id = $(this).attr('id').split("-");
+		entIdSurveille = Id[0];
+		bilIdSurveille = Id[1];
+	
+		showConfirmationPopup("Voulez-vous vraiment supprimer cette entreprise de votre liste de surveillance ?","Merci de confirmer la suppression.", doDeleteSurveillance);
+	
+	});
+}
+function onClickShowMoreSurveillances (){
+	$("body").on("click", ".showMoreSurveillances", function(e) {
+		if (!userConnected())
+			return;
+	
+		$.ajax({
+			type: "POST",
+			url: "user-surveillance",
+			data: "offset="+$("input[name=offset]").val(),
+			success: function(data) {
+				$(".list-surveillances").append(data)
+				var offset = parseInt($("input[name=offset]").val())
+				var nbSurveillances = parseInt($("input[name=offset]").attr("nbSurveillances"))
+				
+				if(Math.ceil(nbSurveillances/5)-1 == offset){
+					$(".showMoreSurveillances").remove();
+				}
+				
+				$("input[name=offset]").val(offset+1)
+				
+				
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+function moveSurveillanceToPortefeuille (){
+	$("body").on("click", ".deplacerSurvToPortefeuille", function(e) {
+		if (!userConnected())
+			return;
+	
+		Id = $(this).attr('id').split("-");
+		entIdSurveille = Id[0];
+		bilIdSurveille = Id[1];
+		denomination = encodeURIComponent($(this).attr('name'));
+		$('#entidPortefeuille').val(entIdSurveille);
+		$('#idbilportefeuille').val(bilIdSurveille);
+		$("#nomEntreprise").val(denomination);
+	
+		$.ajax({
+			type: "POST",
+			url: "societe-afficherPortefeuille",
+			data: "idbilportefeuille=" + bilIdSurveille,
+			success: function(data) {
+				$(".mes-portefeuilles-fiche").html(data);
+				$('.check-portfolio').addClass('check-surveillance');
+				$('.check-surveillance').removeClass('check-portfolio');
+				showModal("listPortefeuille-modal");
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	});
+}
+function checkSurveillance (){
+	$("body").on("change", ".check-surveillance", function(e) {
+		e.preventDefault();
+	
+		var elt = $(this);
+		var locked = elt.siblings('.lock').val();
+		if (locked == 0) {
+			locked = 1;
+			elt.siblings('.lock').val(1);
+			loader.init(elt);
+			loader.load();
+	
+			var hUrl; //this.checked== true:à ajouter /this.checked== false:à supprimer
+			bilIdSurveille = $(".posiDiv").attr('name');
+			entIdSurveille = $("#entidPortefeuille").val();
+			idPortefolio = $(this).attr('id');
+			denomination = $("#nomEntreprise").val();
+			var flagAdd = 0;
+	
+			//Préparation de l'URL à envoyer
+			// Si on rajoute ds le meme portefeuille
+			if (this.checked) {
+				hUrl = "societe-ajouterEntreprisePortefeuille";
+				flagAdd = 1;
+			}
+			else
+				hUrl = "societe-supprimerEntreprisePortefeuille";
+	
+			$.ajax({
+				type: "POST",
+				url: hUrl,
+				data: "idBilPortefeuille=" + bilIdSurveille + "&idPortefeuille=" + idPortefolio + "&denomination=" + denomination,
+				success: function(data) {
+					loader.success();
+					if (flagAdd == 1) doDeleteSurveillance();
+					if (data.success) {
+						locked = 0;
+						elt.siblings('.lock').val(0);
+					}
+				},
+				error: function(request, errorType, errorThrown) {
+					loader.error();
+					locked = 0;
+					elt.siblings('.lock').val(0);
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			}).always(function() { });
+		}
+	});
+}
+function deletePortefeuille (){
+	$("body").on("click", ".supprimerPortefeuille", function(e) {
+		e.preventDefault();
+	
+		Idportefeuille = $(this).attr('id');
+		Nomportefeuille = $(this).attr('name');
+		nbNotifPortefeuille = $(this).attr('nbNotifPortefeuille');
+		
+		showConfirmationPopup("Voulez-vous vraiment supprimer le portefeuille <b> " + Nomportefeuille + " </b> ?","Merci de confirmer la suppression.",doDeletePortefeuille);
+	});
+}
+function deleteEntPortefeuille (){
+	$("body").on("click", ".supprimerEntPortefeuille", function(e) {
+		e.preventDefault();
+	
+		Id = $(this).attr('id').split("-");
+		Idportefeuille = Id[0];
+		Idbil = Id[1];
+	
+		denomination = $(this).attr('name');
+		nbNotifEntreprise = $(this).attr('nbNotifEntreprise');
+	
+		showConfirmationPopup("Voulez-vous vraiment supprimer l'entreprise <b> " + denomination + " </b> ?","Merci de confirmer la suppression.",doDeleteEntPortefeuille);
+	
+	});
+}
+function consultPortefeuille (){
+	$("body").on("click", ".consultPortefeuille", function(event) {
+		event.preventDefault();
+		//IdPortefeuille= $(this).attr('id');
+		Id = $(this).attr('id').split("-");
+		IdPortefeuille = Id[0];
+		TypePortefeuille = Id[1];
+		NomPortefeuille = $(this).attr('name');
+		
+		$.ajax({
+			type: "POST",
+			url: "user-consulterPortefeuille",
+			data: "idPortefeuille=" + IdPortefeuille + "&nomPortefeuille=" + NomPortefeuille + "&typePortefeuille=" + TypePortefeuille,
+			success: function(data) {
+				$(".mes-ent-portefeuilles").html(data);
+				$("#list-portefeuilles").hide();
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	});
+}
+function addPortefeuilleUtilisateur (){
+	$("body").on("click", ".btn-add-portfolio-user", function(event) {
+		event.preventDefault();
+		//$("#nom_Portefeuille").attr("placeholder","");
+		
+	
+		if (!$("#form-portefeuille").valid())
+			return;
+	
+		$.ajax({
+			type: "POST",
+			url: "user-ajouterPortefeuille",
+			data: $("#form-portefeuille").serialize(),
+			success: function(data) {
+				$(".mes-portefeuilles").html(data);
+	
+	
+				var nbPortefeuille = $('.btn-ajouter-portefeuilleEnt').attr('nbPortefolio');
+				var newNbPortefeuille = parseInt(nbPortefeuille) + 1;
+				$('.btn-ajouter-portefeuilleEnt').attr("nbPortefolio", newNbPortefeuille);
+				if (newNbPortefeuille >= maxPortfolios) {
+					var text = "<div class=\"disabledLink\" style=\"cursor: not-allowed;\" title=\"Désolés, vous avez atteint le nombre maximum des portefeuilles à créer. Supprimer ou modifier les portefeuilles existants.\">" +
+						"<a class=\" btn-ajouter  btn-ajouter-portefeuilleEnt bo-hide btn btn-md disabled\"  style=\"font-weight: bold;\" nbPortefolio=\"" + newNbPortefeuille + "\" ><i class=\"  plus-circled-1icon- text-color\"></i>" +
+						"Créer un nouveau portefeuille" +
+						"</a>" +
+						"</div>";
+					$(".btn-add-new-portfolio").html(text);
+	
+					text = "Mes portefeuilles et surveillances" +
+						"<div class=\"tool-bar pull-right disabledLinkUser\" style=\"cursor: not-allowed;\" title=\"Désolés, vous avez atteint le nombre maximum des portefeuilles à créer. Supprimer ou modifier les portefeuilles existants.\">" +
+						"<a class=\"add-portefeuille btn-ajouter-portefeuille-2 btn btn-xs disabled\" nbPortefolio=\"" + newNbPortefeuille + "\" href=\"javascript:;\">" +
+						"<i class=\"plus-circled-1icon-\"></i> Ajouter un nouveau portefeuille" +
+						"</a>" +
+						"</div>";
+					$(".btn-add-new-portfolio-user").html(text);
+				}
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+		
+		hideModal("portefeuille-modal");
+	});
+}
+function addPortefeuilleSociete (setBilid){
+	$("body").on("click", ".btn-add-portfolio", function(event) {
+		event.preventDefault();
+		
+		if (setBilid)
+			$('#idbilportefeuille').val($(".posiDiv").attr('name'));
+	
+		if (!$("#ranger-portefeuille").valid())
+			return;
+	
+		$.ajax({
+			type: "POST",
+			url: "societe-ajouterPortefeuille",
+			data: $("#ranger-portefeuille").serialize(),
+			success: function(data) {
+				$(".mes-portefeuilles-fiche").html(data);
+		
+				$("#ajouter-portefeuille").hide();
+		
+				var nbPortefeuille = $('.btn-ajouter-portefeuilleEnt').attr('nbPortefolio');
+				var newNbPortefeuille = parseInt(nbPortefeuille) + 1;
+				$('.btn-ajouter-portefeuilleEnt').attr("nbPortefolio", newNbPortefeuille);
+				// Si on atteint le nombre max (50) des portefeuilles à créer, le bouton est blocké
+				if (newNbPortefeuille >= maxPortfolios) {
+					var text = "<div class=\"disabledLink\" style=\"cursor: not-allowed;\" title=\"Désolés, vous avez atteint le nombre maximum des portefeuilles à créer. Supprimer ou modifier les portefeuilles existants.\">" +
+						"<a class=\" btn-ajouter  btn-ajouter-portefeuilleEnt bo-hide btn btn-md disabled\"  style=\"font-weight: bold;\" nbPortefolio=\"" + newNbPortefeuille + "\" ><i class=\"  plus-circled-1icon- text-color\"></i>" +
+						"Créer un nouveau portefeuille" +
+						"</a>" +
+						"</div>";
+					$(".btn-add-new-portfolio").html(text);
+		
+				}
+		
+				$("#listePortefeuille").show();
+				$(".btn-ajouter-portefeuilleEnt").show();
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+function openModalUpdatePortefeuille (){
+	$("body").on("click", ".modifierPortefeuille", function(e) {
+		//portefeuille modifier modal start/
+		IdPortefeuilleModif = $(this).attr('id');
+		portefeuille = $(this).attr('name').split("-");
+		Nomportefeuille = portefeuille[0];
+		Descportefeuille = portefeuille[1];
+		$("#nom_PortefeuilleM").attr("value", Nomportefeuille);
+		$("#nom_portefeuille_actuel").attr("value", Nomportefeuille);
+		$("#description_PortefeuilleM").val(Descportefeuille);
+		showModal("portefeuille-modif-modal");
+	});
+}
+function updatePortefeuille (){
+	$("body").on("click", ".btn-update-portfolio", function(event) {
+		event.preventDefault();
+	
+		if (!$("#form-portefeuille-modif").valid())
+			return;
+	
+		$.ajax({
+			type: "POST",
+			url: "user-modifierPortefeuille",
+			data: $("#form-portefeuille-modif").serialize() + "&idPortefeuille=" + IdPortefeuilleModif,
+			success: function(data) {
+				$(".mes-portefeuilles").html(data);
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+		hideModal("portefeuille-modif-modal");
+	});
+}
+function openModalAddPortefeuille (){
+	$("body").on("click", ".btn-ajouter-portefeuille-2", function(e) {
+
+		if ($(this).attr('nbPortefolio') < maxPortfolios) {
+			showModal("portefeuille-modal");
+		}
+		else {
+			$(this).addClass("disabled");
+			$(this).parents(".disabledLinkUser").attr("title", "Désolés, vous avez atteint le nombre maximum des portefeuilles à créer." + "Supprimer ou modifier les portefeuilles existants.");
+		}
+	});
+}
+function cancelAddPortefeuille (){
+	$("body").on("click", ".annuler-btn-portefeuille", function(e) {
+		$("#ajouter-portefeuille").hide();
+	});
+}
+function moveEntPortefeuille (){
+	$("body").on("click", ".deplacerEntPortefeuille", function(e) {
+		if (!userConnected())
+			return;
+	
+		Id = $(this).attr('id').split("-");
+		Idportefeuille = Id[0];
+		bilId = Id[1];
+		denomination = encodeURIComponent($(this).attr('name'));
+		$('#idbilportefeuille').val(bilId);
+		$("#portefeuillePrincipal").val(Idportefeuille);
+		$("#nomEntreprise").val(denomination);
+		//nb  notification entreprise
+		$("#nbNotifEntrepriseInput").val($(this).attr('nbNotifEntreprise'));
+		$.ajax({
+			type: "POST",
+			url: "societe-afficherPortefeuille",
+			data: "idbilportefeuille=" + bilId,
+			success: function(data) {
+				$(".mes-portefeuilles-fiche").html(data);
+				showModal("listPortefeuille-modal");
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+function closeModalListPortefeuille (){
+	$("body").on("click", "#listPortefeuille-modal button.close", function() {
+		hideModal("listPortefeuille-modal");
+		$("#ajouter-portefeuille").hide();
+		$(".btn-ajouter-portefeuilleEnt").show();
+		$("#listePortefeuille").show();
+	});
+	
+	$("body").on("click", "#fermerPopPortefeuille", function(e) {
+		e.preventDefault();
+		hideModal("listPortefeuille-modal");
+	});
+}
+function addEntPortefeuille (){
+	$("body").on("click", ".btn-ajouter-portefeuilleEnt", function() {
+		if ($(this).attr('nbPortefolio') < maxPortfolios) {
+			$("#ajouter-portefeuille").show();
+			$("#listePortefeuille").hide();
+			$(".btn-retour-list-portefeuille").show();
+			$(this).hide();
+		}
+		else {
+			$(this).addClass("disabled");
+			$(this).parents(".disabledLink").attr("title", "Désolés, vous avez atteint le nombre maximum des portefeuilles à créer." +" Supprimer ou modifier les portefeuilles existants.");
+		}
+	});
+}
+function backToListPortefeuille (){
+	$("body").on("click", ".btn-retour-list-portefeuille", function() {
+		$("#ajouter-portefeuille").hide();
+		$("#listePortefeuille").show();
+		$(".btn-ajouter-portefeuilleEnt").show();
+		$(this).hide();
+	});
+}
+function checkPortefeuille (){
+	$("body").on("change", ".check-portfolio", function(e) {
+		e.preventDefault();
+	
+		var elt = $(this);
+		var locked = elt.siblings('.lock').val();
+		if (locked == 0) {
+			locked = 1;
+			elt.siblings('.lock').val(1);
+			loader.init(elt);
+			loader.load();
+	
+			var hUrl; //this.checked== true:à ajouter /this.checked== false:à supprimer
+			bilId = $(".posiDiv").attr('name');
+			idPortefolio = $(this).attr('id');
+			idPortfolioPrincipal = $("#portefeuillePrincipal").val();
+			denomination = $("#nomEntreprise").val();
+			typePortfolioPrincipal = $("#typePortefeuilleInput").val();
+			nbNotifEntreprise = $("#nbNotifEntrepriseInput").val();
+			var flagSurv = 0;
+			var flagDelete = 0;
+	
+			//Préparation de l'URL à envoyer
+			// Si on rajoute ds le meme portefeuille
+			if (idPortefolio == idPortfolioPrincipal) {
+				if (this.checked)
+					hUrl = "user-ajouterEntrepriseLstPortefeuille";
+				else {
+					hUrl = "user-supprimerEntrepriseLstPortefeuille";
+					flagDelete = 1;
+				}
+			}
+			else {
+				if (this.checked)
+					if (typePortfolioPrincipal != 1)
+						hUrl = "societe-ajouterEntreprisePortefeuille";
+					else {
+						hUrl = "user-ajouterEntrepriseLstPortefeuille";
+						flagSurv = 1;
+					}
+				else {
+					hUrl = "societe-supprimerEntreprisePortefeuille";
+					flagDelete = 1;
+				}
+			}
+	
+			$.ajax({
+				type: "POST",
+				url: hUrl,
+				data: "idBilPortefeuille=" + bilId + "&idPortefeuille=" + idPortefolio + "&denomination=" + denomination + "&typePortefeuilleP=" + typePortfolioPrincipal,
+				success: function(data) {
+					loader.success();
+					if (idPortefolio == idPortfolioPrincipal || flagSurv == 1) {
+						$(".mes-ent-portefeuilles").html(data);
+						afficherListePortefeuilles();
+	
+						$("#portefeuillePrincipal").val(idPortfolioPrincipal);
+						$("#nomEntreprise").val(denomination);
+					}
+					//Gestion des notifications
+					if (flagDelete == 1 && nbNotifEntreprise > 0) {
+						oldNotif = $(".nbNotifGlobalInput").val();
+						var newNotif = oldNotif - nbNotifEntreprise;
+						if (newNotif > 0) {
+							$(".nbNotifGlobal").html(newNotif);
+							$(".nbNotifGlobalInput").val(newNotif);
+						}
+						else
+							$(".nbNotifGlobal").hide();
+	
+					}
+					if (data.success && idPortefolio != idPortfolioPrincipal) {
+						locked = 0;
+						elt.siblings('.lock').val(0);
+					}
+				},
+				error: function(request,errorType,errorThrown) {
+					showNotificationPopup("error",messages.erreur_serveur);
+				}
+			}).always(function() { });
+		}
+	});
+}
+function showMenuEditDeleteEntPortefeuille (elt) {
+	//toggle between hiding and showing the dropdown content
+	var $elt = $(elt);
+	$elt.closest(".bloc-itm-info-panier").find(".BlocDropdown").toggle("show");
+}
+function closeMenuEditDeleteEntPortefeuille () {
+	//Closes dropdown
+	$("body").on("click", function(e) {
+		if (!$(e.target).hasClass('dropbtn')) {
+			 $(".dropdown-content").each(function(index, item){
+			    if($(item).is(":visible")){
+			        $(item).hide();
+			    }
+			});
+		}
+	});
+}
+function filterTextInput() {
+  var input = $("input[name=filter]");
+  var text_filter = input.val().toUpperCase();
+	
+ // Loop through all table rows, and hide those who don't match the search query
+	$(".denominationEnt").each(function(index, item){
+	    if($(item).attr("name")){
+	      if ($(item).attr("name").toUpperCase().indexOf(text_filter) > -1) {
+	        $(item).closest(".bloc-itm-info-panier").show();
+	      } else {
+	        $(item).closest(".bloc-itm-info-panier").hide();
+	      }
+	    }
+	});
+}
+function flipFlapReportMiniFiche (){
+	$("body").on("click", ".flip_content1", function(e) {
+		$('.card-detail-1').addClass('flip-content-now');
+	});
+	$("body").on("click", ".flip_content2", function(e) {
+		$('.card-detail-2').addClass('flip-content-now');
+	});
+	$("body").on("click", ".flip_content3", function(e) {
+		$('.card-detail-3').addClass('flip-content-now');
+	});
+	
+	
+	$("body").on("click", ".flip_content_back1", function(e) {
+		$('.card-detail-1').removeClass('flip-content-now');
+	});
+	$("body").on("click", ".flip_content_back2", function(e) {
+		$('.card-detail-2').removeClass('flip-content-now');
+	});
+	$("body").on("click", ".flip_content_back3", function(e) {
+		$('.card-detail-3').removeClass('flip-content-now');
+	});
+}
+function openPopupMiniFiche (){
+	$("body").on("click", ".notifInfoEntreprise", function(e) {
+		bilid = $(this).attr('bilid');
+		elt = $(this);
+		$.ajax({
+			type: "POST",
+			url: "societe-infoEntreprise",//infoEntreprise
+			data: "bilid=" + bilid,
+			success: function(data) {
+				$(".popup-mini-fiche").html(data);
+				//Mise à jour des notifications des portefeuilles dans le menu header
+				notif = $(".nbNotifGlobalMiniFiche").val();
+				if (notif > 0)
+					$(".nbNotifGlobal").html(notif);
+				else
+					$(".nbNotifGlobal").hide();
+				elt.siblings(".notifEntreprise").hide();
+				showModal ("portefeuille-fiche-modal");
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+function validateFormRangerPortefeuille (){
+	$("#ranger-portefeuille").validate({
+		onfocusout: true,
+		rules: {
+			nomPortefeuille: { required: true, checkNomPortefeuille: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+			nomPortefeuille: {
+				required: "Entrez un  nom du portefeuille",
+				checkNomPortefeuille: "Ce nom de portefeuille est déjà utilisé"
+			}
+		}
+	});
+}
+function validateFormPortefeuille (){
+	$("#form-portefeuille").validate({
+		onfocusout: true,
+		rules: {
+			nomPortefeuille: { required: true, checkNomPortefeuille: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+			nomPortefeuille: {
+				required: "Entrez un nom de portefeuille",
+				checkNomPortefeuille: "Ce nom de portefeuille est déjà utilisé"
+			}
+		}
+	});
+}
+function validateFormPortefeuilleModif (){
+	$("#form-portefeuille-modif").validate({
+		onfocusout: true,
+		rules: {
+			nomPortefeuilleM: { required: true, checkSameNamePortefeuille: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+			nomPortefeuilleM: {
+				required: "Entrez un nom de portefeuille",
+				checkSameNamePortefeuille: "Ce nom de portefeuille est déjà utilisé"
+			}
+		}
+	});
+}
+function addPortefeuillePageResultatNational (){
+	$("body").on("click", ".addPortefeuille", function(e) {
+		if (!userConnected())
+			return;
+	
+		bilId = $(this).attr('id');
+		denomination = encodeURIComponent($(this).attr('name'));
+		$.ajax({
+			type: "POST",
+			url: "societe-afficherPortefeuille",
+			data: "idbilportefeuille=" + bilId,
+			success: function(data) {
+				$(".mes-portefeuilles-fiche").html(data);
+				console.log("datap");
+				console.log(data);
+				showModal("listPortefeuille-modal");
+				$("#nomEntreprise").val(denomination);
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error", messages.erreur_serveur);
+			}
+		}).always(function() { });
+	});
+}
+function checkPortefeuillePageResultatNational (){
+	$("body").on("change", ".check-portfolio", function(e) {
+		e.preventDefault();
+	
+		var elt = $(this);
+		var locked = elt.siblings('.lock').val();
+		if (locked == 0) {
+			locked = 1;
+			elt.siblings('.lock').val(1);
+			bilId = $(".posiDiv").attr('name');
+			idPortefolio = $(this).attr('id');
+			denomination = $("#nomEntreprise").val();
+	
+			loader.init(elt);
+			loader.load();
+			var hUrl; //this.checked== true:à ajouter /this.checked== false:à supprimer
+			if (this.checked)
+				hUrl = "societe-ajouterEntreprisePortefeuille";
+			else
+				hUrl = "societe-supprimerEntreprisePortefeuille";
+	
+			$.ajax({
+				type: "POST",
+				url: hUrl,
+				data: "idBilPortefeuille=" + bilId + "&idPortefeuille=" + idPortefolio + "&denomination=" + denomination,
+				success: function(data) {
+					loader.success();
+					if (data.success) {
+						locked = 0;
+						elt.siblings('.lock').val(0);
+					}
+	
+				},
+				error: function(request,errorType,errorThrown) {
+					loader.error();
+					locked = 0;
+					elt.siblings('.lock').val(0);
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			}).always(function() { });
+		}
+	});
+}
+function addPortefeuilleFicheSociete (){
+	$("body").on("click", ".addPortefeuille", function(e) {
+		if (!userConnected())
+			return;
+	
+		bilId = $(this).attr('id');
+		$.ajax({
+			type: "POST",
+			url: "societe-afficherPortefeuille",
+			data: "idbilportefeuille=" + bilId,
+			success: function(data) {
+				$(".mes-portefeuilles-fiche").html(data);
+				showModal("listPortefeuille-modal");
+			},
+			error: function(
+				request,
+				errorType,
+				errorThrown) {
+				showNotificationPopup(
+					"error",
+					messages.erreur_serveur);
+			}
+		}).always(function() { });
+	});
+}
+
+function checkPortefeuilleFicheSociete (){
+	$("body").on("change", ".check-portfolio", function(e) {
+		e.preventDefault();
+	
+		var elt = $(this);
+		var locked = elt.siblings('.lock').val();
+		if (locked == 0) {
+			locked = 1;
+			elt.siblings('.lock').val(1);
+			loader.init(elt);
+			loader.load();
+	
+			bilId = $(".addPortefeuille").attr('id');
+			idPortefolio = $(this).attr('id');
+			var hUrl; //this.checked== true:à ajouter /this.checked== false:à supprimer
+			if (this.checked)
+				hUrl = "societe-ajouterEntreprisePortefeuille";
+			else
+				hUrl = "societe-supprimerEntreprisePortefeuille";
+	
+			$.ajax({
+				type: "POST",
+				url: hUrl,
+				data: "idBilPortefeuille=" + bilId + "&idPortefeuille=" + idPortefolio,
+				success: function(data) {
+					loader.success();
+					if (data.success) {
+						locked = 0;
+						elt.siblings('.lock').val(0);
+					}
+	
+				},
+				error: function(request,errorType,errorThrown) {
+					loader.error();
+					locked = 0;
+					elt.siblings('.lock').val(0);
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			}).always(function() { });
+		}
+	});
+}
+function addNationalReportToCart (){
+	$("body").on("click", ".ajoutRapportPanier", function(e) {
+		e.preventDefault();
+	
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var typeRapport = 0;
+	
+		if ($(this).hasClass("express")) {
+			typeRapport = 4;
+		}
+		else if ($(this).hasClass('silver')) {
+			typeRapport = 1;
+		}
+		else if ($(this).hasClass('gold')) {
+			typeRapport = 2;
+		}
+		else if ($(this).hasClass('platinium')) {
+			typeRapport = 3;
+		}
+		else if ($(this).hasClass('ultimate')) {
+			typeRapport = 5;
+		}
+		
+		let denomination = $(this).attr('denomination');
+	
+		data = "typeRapport=" + typeRapport + "&entid=" + $("input.entid").val() + "&bilid=" + $("input.bilid").val()+ "&codePays=ma&denomination=" + denomination;
+	
+		$(this).addClass("disabled");
+	
+		$.ajax({
+			type: "POST",
+			url: "panier-ajout-rapport",
+			data: data,
+			success: function(data) {
+				if (data.ajoutRapport == 1){
+					showLargeNotificationPopup("Un nouveau rapport a été ajouté à votre panier");
+				}
+				else {
+					showLargeNotificationPopup("Ce rapport existe déjà dans votre panier");
+				}
+				
+								
+				$('.sigmaNotifs').html(parseInt($('.sigmaNotifs').text(), 10)+1);
+				$(".nbCommandesPasEncorePaye").show();
+				$(".nbCommandesPasEncorePaye").html(data.nbCommandesPasEncorePaye);
+				
+				$this.removeClass("disabled");
+			},
+			error: function(request, errorType, errorThrown) {
+				showNotificationPopup("error", messages.erreur_serveur);
+				$this.removeClass("disabled");
+			}
+		})
+	});
+}
+function orderNationalReport (){
+	$("body").on("click", ".commande", function(e) {
+		e.preventDefault();
+	
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var typeRapport = 0;
+	
+		if ($(this).hasClass("express")) {
+			typeRapport = 4;
+		}
+		else if ($(this).hasClass('silver')) {
+			typeRapport = 1;
+		}
+		else if ($(this).hasClass('gold')) {
+			typeRapport = 2;
+		}
+		else if ($(this).hasClass('platinium')) {
+			typeRapport = 3;
+		}
+		else if ($(this).hasClass('ultimate')) {
+			typeRapport = 5;
+		}
+		
+		let denomination = $(this).attr('denomination');
+	
+		window.location.href = "commande-rapport-national?typeRapport=" + typeRapport + "&entid=" + $("input.entid").val() + "&bilid=" + $("input.bilid").val()+ "&codePays=ma&denomination=" + denomination;
+	
+	});	
+}
+function checkAvailablityOfReport (){
+	$("body").on("click", ".commande-alert, .commande-alert2, .commande-alert3", function(e) {
+		e.preventDefault();
+
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+			
+			var message = "";
+			if ($(this).hasClass("commande-alert")) {
+				message = "Ce rapport ne contient aucun bilan financier";
+			}
+			else if ($(this).hasClass("commande-alert2")) {
+				message = "Ce rapport ne contient qu'un seul bilan financier. Nous vous invitons à opter pour le rapport Express";
+			}
+			else if ($(this).hasClass("commande-alert3")) {
+				message = "Ce rapport ne contient pas le score de solvabilité. Nous vous invitons à opter pour les autres types de rapports";
+			}
+	
+	
+		$("#popup-disponibilite-rapport .img-responsive").attr("src", "mosaic_img/disponibilite-rapport-national.png");
+		$("#popup-disponibilite-rapport .content").html(message);
+		showModal("popup-disponibilite-rapport");
+	});
+}
+function hideModalAvailablityOfReport (){
+	$("body").on("click", "#popup-disponibilite-rapport .closebtn", function() {
+		hideModal("popup-disponibilite-rapport");
+	});
+}
+
+if (pageid == "utilisateur-surveillance"){
+	/** *******Delete surveillance ********************* */
+	//deleteSurveillance ();
+	
+	// Deplacer entreprise surveillée dans autre(s) portefeuille(s)
+	moveSurveillanceToPortefeuille ();
+	
+	/************* Changement de l'état du checkbox pour la liste des portefeuilles***************/
+	checkSurveillance ();
+			
+	/*portefeuille fermer le modal-portefeuille*/
+	closeModalListPortefeuille ();
+	
+	/*portefeuille ajouter un portefeuille*/
+	addEntPortefeuille ();
+	
+	/*portefeuille retour à la liste des portefeuilles*/
+	backToListPortefeuille ();
+	
+	
+	//ajout d'un portefeuille .btn-add-portfolio
+	addPortefeuilleSociete (false);
+	
+	validateFormRangerPortefeuille ();
+	
+	onClickShowMoreSurveillances ();
+}
+else if (pageid == "utilisateur-portefeuille"){	
+	/***************** Suppression du portefeuille start***********************/
+	deletePortefeuille ();
+	
+	/***************** Suppression ENTREPRISE du portefeuille start***********************/
+	deleteEntPortefeuille ();
+	
+	//consulter portefeuille
+	consultPortefeuille ();
+	
+	//ajout d'un portefeuille .btn-add-portfolio
+	addPortefeuilleUtilisateur ();
+	
+	//Modifier portefeuille
+	openModalUpdatePortefeuille ();
+	updatePortefeuille ();
+	
+	openModalAddPortefeuille ();
+	
+	cancelAddPortefeuille ();
+	
+	// Deplacer entreprise dans autre(s) portefeuille(s)
+	moveEntPortefeuille ();
+	
+	/*portefeuille fermer le modal-portefeuille*/
+	closeModalListPortefeuille ();
+	
+	/*portefeuille ajouter un portefeuille*/
+	addEntPortefeuille ();
+	
+	
+	/*portefeuille retour à la liste des portefeuilles*/
+	backToListPortefeuille ();
+	
+	/************* Changement de l'état du checkbox pour la liste des portefeuilles***************/
+	checkPortefeuille ();
+	
+	//ajout d'un portefeuille .btn-add-portfolio
+	addPortefeuilleSociete (false);
+	
+	validateFormRangerPortefeuille ();
+	validateFormPortefeuille ();
+	validateFormPortefeuilleModif ();
+	
+	if (mobile == 1){
+		hideModalAvailablityOfReport ();
+		closeMenuEditDeleteEntPortefeuille ();
+	}
+	else {
+		// Flip-flap rapport button
+		flipFlapReportMiniFiche ();
+	}
+	
+	//Consulter mini-fiche entreprise dans le portefeuille
+	openPopupMiniFiche ();
+	
+	// Button commandes
+	addNationalReportToCart ();
+	orderNationalReport ();
+	checkAvailablityOfReport ();
+}
+else if (pageid == "resultat-national"){
+	addPortefeuillePageResultatNational ()
+	closeModalListPortefeuille ();
+	addEntPortefeuille ();
+	backToListPortefeuille ();
+	addPortefeuilleSociete (true);
+	validateFormRangerPortefeuille ();
+	checkPortefeuillePageResultatNational ()
+}
+else if (pageid == "fiche-societe-national"){
+	closeModalListPortefeuille ();
+	addEntPortefeuille ();
+	addPortefeuilleFicheSociete ();
+	checkPortefeuilleFicheSociete ()
+	/*portefeuille retour à la liste des portefeuilles*/
+	backToListPortefeuille ();
+	//ajout d'un portefeuille .btn-add-portfolio
+	addPortefeuilleSociete (false);
+	validateFormRangerPortefeuille ();
+}	

@@ -1,0 +1,42 @@
+.iziModal .iziModal-content p{margin-bottom:2px;}
+#modal-welcome, #modal-alert{background:rgba(255,255,255,0.1);}
+#modal-iframe{border-bottom-color:black !important;background:black;}
+.izimodal-custom{width:431px;height:222px;}
+.izimodal-custom header{background:#eee;margin-bottom:10px;overflow:hidden;border-radius:3px 3px 0 0;width:100%;}
+.izimodal-custom header a{display:block;float:left;width:50%;padding:0;text-align:center;background:#ddd;color:#999;height:65px;vertical-align:middle;line-height:65px;font-family:'Lato', arial;font-size:15px;transition:all 0.3s ease;}
+.izimodal-custom header a:not(.active):hover{box-shadow:inset 0 -10px 20px -10px #aaa}
+.izimodal-custom header a.active{background:#fff;color:#777;}
+.izimodal-custom .sections{overflow:hidden;}
+.izimodal-custom section{padding:30px;}
+.izimodal-custom section input:not([type="checkbox"]), .izimodal-custom section button{width:100%;border-radius:3px;border:1px solid #ddd;margin-bottom:26px;padding:15px;font-size:14px;}
+.izimodal-custom section button{height:46px;padding:0;}
+.izimodal-custom section input:focus{border-color:#28CA97;}
+.izimodal-custom section label[for="check"]{margin-bottom:26px;font-size:14px;color:#999;display:block;}
+.izimodal-custom section footer {overflow: hidden;padding: 0px 19px 15px;display: flex;float: left;}
+.izimodal-custom section button{background:#28CA97;color:white;margin:0;border:0;cursor:pointer;width:50%;float:left;}
+.izimodal-custom section button:hover{opacity:0.8;}
+.izimodal-custom section button:nth-child(1){border-radius:3px 0 0 3px;background:#aaa;}
+.izimodal-custom section button:nth-child(2){border-radius:0 3px 3px 0;}
+.izimodal-custom .icon-close{background:#FFF;margin-bottom:10px;position:absolute;right:-8px;top:-8px;font-size:14px;font-weight:bold;border-radius:50%;width:30px;height:30px;border:0;color:#a9a9a9;cursor:pointer;}
+.izimodal-custom .icon-close:hover, .izimodal-custom .icon-close:focus{color:black;}
+.izimodal-custom.hasScroll .icon-close{display:none;}
+.iziModal .iziModal-header-title{font-family:'Lato', arial;font-weight:500;}
+.izimodal-custom footer.main{background:#fff;padding:35px 5px;text-align:center;font-family:'Lato';font-size:0.9em;}
+.izimodal-custom footer.main p{color:#aeaeae;margin-bottom:10px;}
+.izimodal-custom footer.main p a{color:#aeaeae;}
+.izimodal-custom footer.main p a:hover{text-decoration:underline;}
+.izimodal-custom footer.main p.assign{font-size:11px;}
+.izimodal-custom footer ul li{display:inline-block;margin:0 5px;color:#999;}
+.izimodal-custom footer ul li a{display:block;padding:10px 0;margin-bottom:20px;}
+.izimodal-custom footer ul li a:link, .izimodal-custom footer ul li a:visited, .izimodal-custom footer ul li a:active{color:#555;}
+.izimodal-custom footer ul li a:hover{opacity:0.7;}
+.confirmation-container *{color:#333;}
+.confirmation-container .title {font-size: 17.5px; padding: 20px 20px 0 20px;}
+.sm-popup .sm-button{display:none;}
+.confirmation-container .image-notif {padding: 35px 0px 0 14px;text-align: center;}
+.confirmation-container p {font-size: 14px;line-height: 10px;padding: 16px 20px 20px 20px;opacity: 0.7;}
+.confirmation-container .action{float:left;width:50%;font-size:12px;color:#fff;text-transform:uppercase;padding:10px;cursor:pointer;transition:all 0.1s ease;border-radius:0px 0px 6px 0px;}
+.confirmation-container .action.yes{background:#238CAD;border-radius:0px 0px 0px 6px;}
+.confirmation-container .action.no{background:#333;border-radius:0px 0px 6px 0px;}
+.confirmation-container .action.yes:hover{background:rgb(76, 165, 192);}
+.confirmation-container .action.no:hover{background:#666;}

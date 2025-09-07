@@ -1,0 +1,1725 @@
+function initFicheSociete (){
+	if (idMktUser != null) {				
+		Inputmask("99-99-99-99-99").mask(".tel");
+		Inputmask("email").mask(".mail");
+		Inputmask("9{1,30}").mask(".capital");
+		Inputmask("url").mask(".web-site");
+	}
+	
+	if (action != null && action == 'edit') {
+		setTimeout(function() {
+			$('#service-edition').click();
+		}, 2000);
+	}
+}
+function directDownloadNationalReport (){
+	$("body").on("click", ".directDownloadRapportNational", function(e) {
+		e.preventDefault();
+	
+		$this = $(this);
+	
+		var entid = $this.attr("entid");
+		var typeRapport = $this.attr("typeRapport");
+		var denomination = $this.attr("denomination");
+	
+		var href = "societe-reportDirectDownload?entid=" + entid + "&typeRapport=" + typeRapport + "&denomination=" + denomination;
+		window.location.replace(href);
+	
+	});
+}
+function openModalMapFiche (){
+	$('.showLeafletMap').click(function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		$("#modal-map #map-leaflet-1").css("min-height", "30em")
+		$('#modal-map').iziModal('setFullscreen', false);
+		$('#modal-map').iziModal('open');
+	
+		initializeMapFichePopup($("input.latitude").val(), $("input.longitude").val(), $("input.withmarker").val(), true);
+	
+	});
+}
+function openModalMapFicheMobile (){
+	$('.showLeafletMap').click(function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+
+		$("#modal-map #map-leaflet-1").css("min-height", "30em")
+		$('#modal-map').iziModal('setFullscreen', false);
+		$('#modal-map').iziModal('open');
+	
+		initializeMapFichePopup($("input.latitude").val(), $("input.longitude").val(), $("input.withmarker").val(), false);
+		
+//		marker.setLatLng([latitude, longitude]);
+//		mapPageResultat.panTo([latitude, longitude]);
+	
+	});
+}
+function showRcIceFiche (){
+	$('.showHiddenInfos').click(function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	});
+}
+function traceShareFiche (){
+	$("body").on("click", ".social-share a", function() {
+		$.post("societe-traceshare",
+			{
+				name: $(this).data("socialshare"),
+				bilId: $("input.bilid").val(),
+				entId: $("input.entid").val()
+			});
+	});
+}
+function addReview (){
+	$("body").on("click", ".addAdvice", function(e) {
+		e.preventDefault();
+		
+		$this = $(this);
+		
+		if (!userConnected())
+			return;
+	
+		var url = $(this).attr("url");
+		window.location = url;
+	});
+}
+function editFiche (){
+	$("body").on("click", ".service-edition", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		$('.containerToggle').hide();
+		$('#edit-fiche').show();
+		//gestion des blocs à droite
+		$('#contribution-info').show();
+		$('.pubicite-right').hide();
+		return false;
+	});
+	
+	if (idMktUser != null) {
+		var mode = $.urlParam('mode');
+		if (mode == "edit") {
+			$('.containerToggle').hide();
+			$('#edit-fiche').show();
+			//gestion des blocs à droite
+			$('#contribution-info').show();
+			$('.pubicite-right').hide();
+			var uri = window.location.toString();
+			if (uri.indexOf("?") > 0) {
+				var clean_uri = uri.substring(0, uri.indexOf("?"));
+				window.history.replaceState({}, document.title, clean_uri);
+			}
+		}
+		else {
+			$('.containerToggle').show();
+			$('#edit-fiche').hide();
+		}
+	}
+	else {
+		$('.containerToggle').show();
+		$('#edit-fiche').hide();
+	}
+}
+function addNationalReportToCart (){
+	$("body").on("click", ".ajoutRapportPanier", function(e) {
+		e.preventDefault();
+	
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var typeRapport = 0;
+	
+		if ($(this).hasClass("express")) {
+			typeRapport = 4;
+		}
+		else if ($(this).hasClass('silver')) {
+			typeRapport = 1;
+		}
+		else if ($(this).hasClass('gold')) {
+			typeRapport = 2;
+		}
+		else if ($(this).hasClass('platinium')) {
+			typeRapport = 3;
+		}
+		else if ($(this).hasClass('ultimate')) {
+			typeRapport = 5;
+		}
+		
+		let denomination = $(this).attr('denomination');
+	
+		data = "typeRapport=" + typeRapport + "&entid=" + $("input.entid").val() + "&bilid=" + $("input.bilid").val()+ "&codePays=ma&denomination=" + denomination;
+	
+		$(this).addClass("disabled");
+	
+		$.ajax({
+			type: "POST",
+			url: "panier-ajout-rapport",
+			data: data,
+			success: function(data) {
+				if (data.ajoutRapport == 1){
+					showLargeNotificationPopup("Un nouveau rapport a été ajouté à votre panier");
+				}
+				else {
+					showLargeNotificationPopup("Ce rapport existe déjà dans votre panier");
+				}
+				
+								
+				$('.sigmaNotifs').html(parseInt($('.sigmaNotifs').text(), 10)+1);
+				$(".nbCommandesPasEncorePaye").show();
+				$(".nbCommandesPasEncorePaye").html(data.nbCommandesPasEncorePaye);
+				
+				$this.removeClass("disabled");
+			},
+			error: function(request, errorType, errorThrown) {
+				showNotificationPopup("error", messages.erreur_serveur);
+				$this.removeClass("disabled");
+			}
+		})
+	});
+}
+function orderNationalReport (){
+	$("body").on("click", ".commande", function(e) {
+		e.preventDefault();
+	
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var typeRapport = 0;
+	
+		if ($(this).hasClass("express")) {
+			typeRapport = 4;
+		}
+		else if ($(this).hasClass('silver')) {
+			typeRapport = 1;
+		}
+		else if ($(this).hasClass('gold')) {
+			typeRapport = 2;
+		}
+		else if ($(this).hasClass('platinium')) {
+			typeRapport = 3;
+		}
+		else if ($(this).hasClass('ultimate')) {
+			typeRapport = 5;
+		}
+		
+		let denomination = $(this).attr('denomination');
+	
+		window.location.href = "commande-rapport-national?typeRapport=" + typeRapport + "&entid=" + $("input.entid").val() + "&bilid=" + $("input.bilid").val()+ "&codePays=ma&denomination=" + denomination;
+	
+	});	
+}
+function checkAvailablityOfReport (){
+	$("body").on("click", ".commande-alert, .commande-alert2, .commande-alert3", function(e) {
+		e.preventDefault();
+
+		var $this = $(this);
+	
+		if (!userConnected())
+			return;
+			
+			var message = "";
+			if ($(this).hasClass("commande-alert")) {
+				message = "Ce rapport ne contient aucun bilan financier";
+			}
+			else if ($(this).hasClass("commande-alert2")) {
+				message = "Ce rapport ne contient qu'un seul bilan financier. Nous vous invitons à opter pour le rapport Express";
+			}
+			else if ($(this).hasClass("commande-alert3")) {
+				message = "Ce rapport ne contient pas le score de solvabilité. Nous vous invitons à opter pour les autres types de rapports";
+			}
+	
+	
+		$("#popup-disponibilite-rapport .img-responsive").attr("src", "mosaic_img/disponibilite-rapport-national.png");
+		$("#popup-disponibilite-rapport .content").html(message);
+		showModal("popup-disponibilite-rapport");
+	});
+}
+function hideModalAvailablityOfReport (){
+	$("body").on("click", "#popup-disponibilite-rapport .closebtn", function() {
+		hideModal("popup-disponibilite-rapport");
+	});
+}
+function initSliderFiche (){
+	$('#quote-carousel').carousel({
+		interval: 4000,
+	});
+}
+function showFiche() {
+	$('.return-to-fiche').click(function(e) {
+		e.preventDefault();
+		var parentId = $(this).parents('div[id^="rubrique-new-review"]')[0].id;
+	
+		if (parentId == "new-review-haut"){
+			$('.containerToggle').fadeOut(0, function() {
+				$('div#fiche').fadeIn(0);
+			});
+		}
+	});
+}
+function manageDirtyInputs (){
+	$("body").on("change", ".changeable", function(e) {
+		$this = $(this);
+	
+		var value = $this.val().trim();
+		var defaultValue;
+	
+	
+		if ($(this).is("input") || $(this).is("textarea"))
+			defaultValue = $this[0].defaultValue.trim();
+		else
+			defaultValue = $this[0].defaultValue;
+	
+		var name = $this.attr("name");
+	
+		if ($this.hasClass("tel")) {
+			value = value.replaceAll("-", "");
+		}
+	
+		if (value != defaultValue && value.trim() != "") {
+			$("input[name='" + name + "_dirty" + "']").val("1");
+			$("select[name='" + name + "_dirty" + "']").val("1");
+	
+			//var parent = $this.parent(".un-contact") ;
+			var parent = $this.closest('.un-contact');
+	
+			if (parent.length > 0) {
+				var splitName = name.split("_");
+	
+				var idContact = splitName[splitName.length - 1];
+	
+				var hiddenField = parent.find(".hidden-name-contact");
+				var hiddenFieldDirty = parent.find(".hidden-name-contact-dirty");
+				hiddenFieldDirty.val("1");
+			}
+		}
+		else {
+			$("input[name='" + name + "_dirty" + "']").val(null);
+		}
+	
+	});
+}
+function selectCodeSegmentEffectif () {
+	$("body").on('change keyup', "#effectif", function(event) {
+	    //gestion du positionnement segement  effectif selon l'effectif choisi
+		var value = $.trim($("#effectif").val());
+	
+		if (value < 11) {
+			$("#code-segment-effectif option[value='1']").attr("selected", "selected");
+		}
+		else if (value < 51) {
+			$("#code-segment-effectif option[value='2']").attr("selected", "selected");
+		}
+		else if (value < 101) {
+			$("#code-segment-effectif option[value='3']").attr("selected", "selected");
+		}
+		else if (value < 501) {
+			$("#code-segment-effectif option[value='4']").attr("selected", "selected");
+		}
+		else if (value < 1001) {
+			$("#code-segment-effectif option[value='5']").attr("selected", "selected");
+		}
+		else if (value < 5001) {
+			$("#code-segment-effectif option[value='6']").attr("selected", "selected");
+		}
+		else if (value < 10001) {
+			$("#code-segment-effectif option[value='7']").attr("selected", "selected");
+		}
+		else if (value > 10000) {
+			$("#code-segment-effectif option[value='8']").attr("selected", "selected");
+		}
+	
+		//forcer jquery  à  declencher l'événement change (pour la gestion des champs dirty)
+		$("#code-segment-effectif").change();
+	});
+}
+function manageRadioEffectif (){
+	// gerer le radio button de l'effectif
+	$('input[type=radio][name=radio-effectif]').change(function() {
+		if (this.value == 'societe') {
+			$("#effectif").show();
+			$("#code-segment-effectif").hide();
+		}
+		else if (this.value == 'segment') {
+			$("#code-segment-effectif").show();
+			$("#effectif").hide();
+		}
+	});
+}
+function addTelFaxMailWeb(type, idWrapper, index, mobile) {
+	var name = "telfaxmailweb_" + type + "_0_" + index;
+	var sType = "tel";
+	if (type == 1) {
+		sType = "tel";
+		title = " le téléphone ";
+	}
+	else if (type == 2) {
+		sType = "fax";
+		title = " le fax ";
+	}
+	else if (type == 3) {
+		sType = "mail";
+		title = " l'e-mail ";
+	}
+	else if (type == 4) {
+		sType = "web";
+		title = " le site web ";
+	}
+	
+	var icon = "<i class='cancelicon-' ></i>";
+	var classes = "";
+	if ( mobile ){
+		icon = "<span class='material-icons-outlined' style='font-size:1.4em;'>&#xe872</span>";
+		classes = "button button--white button--ex-small";
+	}
+				
+
+	var recRow = "<input   type ='hidden' name='" + name + "_dirty' class='dirtyfield addedTag'  />"
+		+ "<input type='text'  name='" + name + "' value=''  class='" + sType + " input-text changeable width85pc addedTag' style='width: 63%; height: 22px !important;'  />"
+		+ "<button type='button'  class=' "+classes+" btn-Supprimer btn btn-xs btn-red dlt-btn-sm btn-danger btn-supprimer-" + sType + " popup-confirmation bo-hide pull-right addedTag' title=\"Supprimer" + title + "\">"+icon+" </button>"
+
+	jQuery("#" + idWrapper).append(recRow);
+
+	Inputmask("99-99-99-99-99").mask(".tel");
+	Inputmask("email").mask(".mail");
+}
+function addPhone (mobile){
+	//  ajout d'un nouveau tel (clici sur le bouton +)
+	$("body").on("click", ".btn-ajouter-tel", function() {
+		$this = $(this);
+	
+		addTelFaxMailWeb(1, "container-tel", indexTel, mobile);
+		indexTel++;
+	});
+}
+function addFax (mobile){
+	//  ajout d'un nouveau fax (clici sur le bouton +)
+	$("body").on("click", ".btn-ajouter-fax", function() {
+		$this = $(this);
+		addTelFaxMailWeb(2, "container-fax", indexFax, mobile);
+		indexFax++;
+	
+	});
+}
+function addMail (mobile){
+	//  ajout d'un nouvel email (clici sur le bouton +)
+	$("body").on("click", ".btn-ajouter-mail", function() {
+		$this = $(this);
+		addTelFaxMailWeb(3, "container-mail", indexMail, mobile);
+		indexMail++;
+	});
+}
+function addWebsite (mobile){
+	//  ajout d'un  nouveau site web (clici sur le bouton +)
+	$("body").on("click", ".btn-ajouter-web", function() {
+		$this = $(this);
+		addTelFaxMailWeb(4, "container-web", indexWeb, mobile);
+		indexWeb++;
+	});
+}
+function doDeleteTelfaxmailweb () {
+	if ($button) {
+		var htmlId = $button.attr("id");
+		var split = htmlId.split("-");
+
+		if (split.length > 0) {
+			var id = split[split.length - 1];
+
+			//requête ajax
+			$.ajax({
+				type: "POST",
+				url: "societe-supprimertelfaxmailweb",
+				data: "id=" + id,
+				timeout: 600000,
+				success: function(data) {
+					var containerId = $button.parents("div").attr("id");
+
+					var name = $button.prev().attr("name");
+					$("input[name='" + name + "_dirty" + "']").val("1");
+					$button.prev().remove();
+					$button.next().remove();
+					$button.remove();
+
+					var nbre = $("#" + containerId + " input").length;
+
+					if (nbre < 2) {
+						addTelFaxMailWeb(type, containerId, "", mobile);
+					}
+
+					showNotificationPopup('success', 'succès de la suppression');
+
+					//type, idWrapper, cssClass
+				},
+				error: function(request, errorType, errorThrown) {
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			});
+		}
+	}
+}
+function deletePhone (mobile){
+	//  suppression d'un tel
+	$("body").on("click", ".btn-supprimer-tel", function(event) {
+		event.preventDefault();
+		$this = $(this);
+	
+	
+		$button = $this;
+	
+		type = 1;
+	
+		var htmlId = $button.attr("id");
+	
+		if (isBlank(htmlId)) {
+			$button.prev().remove();
+			$button.prev().remove();
+			$button.next().remove();
+			$button.remove();
+			var containerId = $button.parents("div").attr("id");
+			var nbre = $("#" + containerId + " input").length;
+			if (nbre < 2) {
+				addTelFaxMailWeb(type, containerId, "", mobile);
+			}
+		}
+		else {
+			if (idMktUser != null && maxBOUser > idMktUser)
+				showConfirmationPopup("Voulez-vous vraiment supprimer ce num&eacute;ro de t&eacute;l&eacute;phone ? ", "Merci de confirmer la suppression.", doDeleteTelfaxmailweb);
+			else {
+				$button.prev().remove();
+				$button.prev().remove();
+				$button.next().remove();
+				$button.remove();
+				var containerId = $button.parents("div").attr("id");
+				var nbre = $("#" + containerId + " input").length;
+				if (nbre < 2) {
+					addTelFaxMailWeb(type, containerId, "", mobile);
+				}
+			}
+		}
+	});
+}
+function deleteFax (mobile){
+	//  suppression d'un fax
+	$("body").on("click", ".btn-supprimer-fax", function(event) {
+		event.preventDefault();
+		$this = $(this);
+	
+	
+		$button = $this;
+	
+		type = 2;
+	
+		var htmlId = $button.attr("id");
+	
+		if (isBlank(htmlId)) {
+			$button.prev().remove();
+			$button.prev().remove();
+			$button.next().remove();
+			$button.remove();
+			var containerId = $button.parents("div").attr("id");
+			var nbre = $("#" + containerId + " input").length;
+			if (nbre < 2) {
+				addTelFaxMailWeb(type, containerId, "", mobile);
+			}
+		}
+		else {
+			if (idMktUser != null && maxBOUser > idMktUser)
+				showConfirmationPopup("Voulez-vous vraiment supprimer ce num&eacute;ro de fax ? ", "Merci de confirmer la suppression.", doDeleteTelfaxmailweb);
+			else {
+				$button.prev().remove();
+				$button.prev().remove();
+				$button.next().remove();
+				$button.remove();
+				var containerId = $button.parents("div").attr("id");
+				var nbre = $("#" + containerId + " input").length;
+				if (nbre < 2) {
+					addTelFaxMailWeb(type, containerId, "", mobile);
+				}
+			}
+		}
+	});
+}
+function deleteMail (mobile){
+	//  suppression d'un mail
+	$("body").on("click", ".btn-supprimer-mail", function(event) {
+		event.preventDefault();
+		$this = $(this);
+	
+	
+		$button = $this;
+	
+		type = 3;
+	
+		var htmlId = $button.attr("id");
+	
+		if (isBlank(htmlId)) {
+			$button.prev().remove();
+			$button.prev().remove();
+			$button.next().remove();
+			$button.remove();
+			var containerId = $button.parents("div").attr("id");
+			var nbre = $("#" + containerId + " input").length;
+			if (nbre < 2) {
+				addTelFaxMailWeb(type, containerId, "", mobile);
+			}
+		}
+		else {
+			if (idMktUser != null && maxBOUser > idMktUser)
+				showConfirmationPopup("Voulez-vous vraiment supprimer cet email ? ", "Merci de confirmer la suppression.", doDeleteTelfaxmailweb);
+			else {
+				$button.prev().remove();
+				$button.prev().remove();
+				$button.next().remove();
+				$button.remove();
+				var containerId = $button.parents("div").attr("id");
+				var nbre = $("#" + containerId + " input").length;
+				if (nbre < 2) {
+					addTelFaxMailWeb(type, containerId, "", mobile);
+				}
+			}
+		}
+	});
+}
+function deleteWebsite (mobile){
+	//  suppression d'un web
+	$("body").on("click", ".btn-supprimer-web", function(event) {
+		event.preventDefault();
+		$this = $(this);
+	
+	
+		type = 4;
+	
+		$button = $this;
+	
+		var htmlId = $button.attr("id");
+	
+	
+		if (isBlank(htmlId)) {
+			$button.prev().remove();
+			$button.prev().remove();
+			$button.next().remove();
+			$button.remove();
+			var containerId = $button.parents("div").attr("id");
+			var nbre = $("#" + containerId + " input").length;
+			if (nbre < 2) {
+				addTelFaxMailWeb(type, containerId, "", mobile);
+			}
+		}
+		else {
+			if (idMktUser != null && maxBOUser > idMktUser)
+				showConfirmationPopup("Voulez-vous vraiment supprimer ce site web ? ", "Merci de confirmer la suppression.", doDeleteTelfaxmailweb);
+			else {
+				$button.prev().remove();
+				$button.prev().remove();
+				$button.next().remove();
+				$button.remove();
+				var containerId = $button.parents("div").attr("id");
+				var nbre = $("#" + containerId + " input").length;
+				if (nbre < 2) {
+					addTelFaxMailWeb(type, containerId, "", mobile);
+				}
+			}
+		}
+	});
+}
+function strikethroughPhone (){
+	// barrer l'ancienne valeur de telephone en suppression 
+	$("body").on("click", ".barrer-telephone", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_1_" + buttonId[1] + "']").css("text-decoration-line", "line-through");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").siblings().css("text-decoration-line", "line-through");
+		$("[name='telfaxmailweb_1_" + buttonId[1] + "']").addClass("delete-true");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").siblings().addClass("delete-true");
+	
+		$this.addClass("delete-true");
+		$this.next().addClass("delete-true");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "_dirty" + "']").val("1");
+		$(this).hide();
+		$("button[id='restTel-" + buttonId[1] + "']").show();
+	
+	
+	});
+}
+function strikethroughFax (){
+	//barrer l'ancienne valeur de fax en suppression 
+	$("body").on("click", ".barrer-fax", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_2_" + buttonId[1] + "']").css("text-decoration-line", "line-through");
+		$("[name='telfaxmailweb_2_" + buttonId[1] + "']").addClass("delete-true");
+		$this.addClass("delete-true");
+		$this.next().addClass("delete-true");
+		$("input[name='telfaxmailweb_2_" + buttonId[1] + "_dirty" + "']").val("1");
+		$(this).hide();
+		$("button[id='restFax-" + buttonId[1] + "']").show();
+	
+	});
+}
+function strikethroughMail (){
+	//barrer l'ancienne valeur de email en suppression 
+	$("body").on("click", ".barrer-email", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_3_" + buttonId[1] + "']").css("text-decoration-line", "line-through");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").siblings().css("text-decoration-line", "line-through");
+		$("[name='telfaxmailweb_3_" + buttonId[1] + "']").addClass("delete-true");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").siblings().addClass("delete-true");
+	
+		$this.addClass("delete-true");
+		$this.next().addClass("delete-true");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "_dirty" + "']").val("1");
+		$(this).hide();
+		$("button[id='restEmail-" + buttonId[1] + "']").show();
+	
+	});
+}
+function strikethroughWebsite (){
+	//barrer l'ancienne valeur de site web en suppression 
+	$("body").on("click", ".barrer-site-web", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_4_" + buttonId[1] + "']").css("text-decoration-line", "line-through");
+		$("[name='telfaxmailweb_4_" + buttonId[1] + "']").addClass("delete-true");
+		$this.addClass("delete-true");
+		$this.next().addClass("delete-true");
+		$("input[name='telfaxmailweb_4_" + buttonId[1] + "_dirty" + "']").val("1");
+		$(this).hide();
+		$("button[id='restWeb-" + buttonId[1] + "']").show();
+	
+	});
+}
+function restorePhone (){
+	//restaurer l'ancienne valeur de telephone en suppression 
+	$("body").on("click", ".btn-restaurer-telephone", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_1_" + buttonId[1] + "']").css("text-decoration-line", "none");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").siblings().css("text-decoration-line", "none");
+		$("[name='telfaxmailweb_1_" + buttonId[1] + "']").removeClass("delete-true");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").siblings().removeClass("delete-true");
+	
+		$this.removeClass("delete-true");
+		$this.next().removeClass("delete-true");
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "_dirty" + "']").val("0");
+		$(this).hide();
+		$("button[id='delTel-" + buttonId[1] + "']").show();
+	
+	
+	});
+}
+function restoreFax (){
+	//restaurer l'ancienne valeur de fax en suppression 
+	$("body").on("click", ".btn-restaurer-fax", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_2_" + buttonId[1] + "']").css("text-decoration-line", "none");
+		$("[name='telfaxmailweb_2_" + buttonId[1] + "']").removeClass("delete-true");
+		$this.removeClass("delete-true");
+		$this.next().removeClass("delete-true");
+		$("input[name='telfaxmailweb_2_" + buttonId[1] + "_dirty" + "']").val("0");
+		$(this).hide();
+		$("button[id='delFax-" + buttonId[1] + "']").show();
+	
+	});
+}
+function restoreMail (){
+	//restaurer l'ancienne valeur de email en suppression 
+	$("body").on("click", ".btn-restaurer-email", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_3_" + buttonId[1] + "']").css("text-decoration-line", "none");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").siblings().css("text-decoration-line", "none");
+	
+		$("[name='telfaxmailweb_3_" + buttonId[1] + "']").removeClass("delete-true");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").siblings().removeClass("delete-true");
+		$this.removeClass("delete-true");
+		$this.next().removeClass("delete-true");
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "_dirty" + "']").val("0");
+		$(this).hide();
+		$("button[id='delEmail-" + buttonId[1] + "']").show();
+	
+	});
+}
+function restoreWebsite (){
+	//restaurer l'ancienne valeur de site web en suppression 
+	$("body").on("click", ".btn-restaurer-web", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_4_" + buttonId[1] + "']").css("text-decoration-line", "none");
+		$("[name='telfaxmailweb_4_" + buttonId[1] + "']").removeClass("delete-true");
+		$this.removeClass("delete-true");
+		$this.next().removeClass("delete-true");
+		$("input[name='telfaxmailweb_4_" + buttonId[1] + "_dirty" + "']").val("0");
+		$(this).hide();
+		$("button[id='delWeb-" + buttonId[1] + "']").show();
+	
+	});
+}
+function modifyPhone (){
+	//modifier l'ancienne valeur de telephone
+	$("body").on("click", ".modifier-telephone", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		//$("[name='telfaxmailweb_1_"+buttonId[1]+"']").prop("disabled", false);
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").show();
+		$("input[name='telfaxmailweb_1_" + buttonId[1] + "']").siblings().hide();
+	
+		$(this).closest('.un-contact').find('.old-data').hide();
+		$(this).closest('.un-contact').find('.changeable').show();
+	
+	});
+}
+function modifyFax (){
+//modifier l'ancienne valeur de fax
+$("body").on("click", ".modifier-fax", function(e) {
+	event.preventDefault();
+	$this = $(this);
+
+	var buttonId = $this.attr("id").split('-');
+	$("[name='telfaxmailweb_2_" + buttonId[1] + "']").prop("disabled", false);
+
+});
+}
+function modifyMail (){
+	//modifier l'ancienne valeur de email
+	$("body").on("click", ".modifier-email", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		//$("[name='telfaxmailweb_3_"+buttonId[1]+"']").prop("disabled", false);
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").show();
+		$("input[name='telfaxmailweb_3_" + buttonId[1] + "']").siblings().hide();
+	
+		$(this).closest('.un-contact').find('.old-data').hide();
+		$(this).closest('.un-contact').find('.changeable').show();
+	
+	});
+}
+function modifyWebsite (){
+	//modifier l'ancienne valeur de site web
+	$("body").on("click", ".modifier-web", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+		$("[name='telfaxmailweb_4_" + buttonId[1] + "']").prop("disabled", false);
+	
+	});
+}
+function addManager (){
+	//ajouter un row à la table des responsables
+	$("body").on("click", ".btn-ajouter-contact-tbl", function() {
+		var htmlTr = $("#tr-responsable-contact").clone().find("tbody");
+	
+		$(htmlTr).find("input, select").each(function() {
+			var $this = $(this);
+			var name = $this.attr("name");
+			if (name) {
+				$this.attr("name", name + indexResponsables);
+			}
+	
+		});
+	
+		$(htmlTr).find(".un-contact").addClass("addedTag");
+	
+		$("#table-responsables > tbody:last-child").append($(htmlTr).html());
+	
+		$("#div-no-contact").hide();
+	
+		$(".new-tel").removeClass("new-tel");
+	
+		indexResponsables++;
+	
+		// les masques de saisie
+		Inputmask("99-99-99-99-99").mask(".tel");
+		Inputmask("email").mask(".mail");
+		
+	
+	});
+}
+function addManager2 (){
+	$("body").on("click", ".btn-ajouter-contact", function() {
+		var htmlTr = $("#tr-contact").clone();
+	
+		$(htmlTr).find("input, select").each(function() {
+			var $this = $(this);
+	
+			var name = $this.attr("name");
+	
+			if (name) {
+				$this.attr("name", name + indexContact);
+			}
+		});
+	
+		$(htmlTr).find(".un-contact").addClass("addedTag");
+	
+		$("#list-contact").append($(htmlTr).html());
+	
+		$("#div-no-contact").hide();
+	
+		$(".new-tel").removeClass("new-tel");
+	
+		indexContact++;
+	
+	});
+}
+function doDeleteManager () {
+	var container = $button.parents(".un-contact");
+
+	if ($button) {
+		var htmlId = $button.attr("id");
+
+		var split = htmlId.split("-");
+
+		if (split.length > 0) {
+			var id = split[split.length - 1];
+
+			//requête ajax
+			$.ajax
+				(
+					{
+						type: "POST",
+						url: "societe-supprimercontact",
+						data: "id=" + id,
+						timeout: 600000,
+						success: function(data) {
+							var container = $button.parents(".un-contact");
+							container.remove();
+							showNotificationPopup('success', 'contact supprim&eacute; avec succès');
+
+							var nbre = $(".un-contact").length;
+							if (nbre <= 1) {
+								$("#div-no-contact").show();
+							}
+						},
+						error: function(request, errorType, errorThrown) {
+							showNotificationPopup("error", messages.erreur_serveur)
+						}
+					}
+				);
+		}
+	}
+}
+function deleteManager (){
+	$("body").on("click", ".btn-supprimer-contact", function(event) {
+		event.preventDefault();
+		$this = $(this);
+	
+	
+		$button = $this;
+	
+		var htmlId = $button.attr("id");
+	
+		if (isBlank(htmlId)) {
+			var container = $button.parents(".un-contact");
+			container.remove();
+			var nbre = $(".un-contact").length;
+			if (nbre <= 1) {
+				$("#div-no-contact").show();
+			}
+		}
+		else {
+			if (idMktUser != null && maxBOUser > idMktUser)
+				showConfirmationPopup("Voulez-vous vraiment supprimer ce  contact? ", "Merci de confirmer la suppression.", doDeleteManager);
+			else {
+				var container = $button.parents(".un-contact");
+				container.remove();
+				var nbre = $(".un-contact").length;
+				if (nbre <= 1) {
+					$("#div-no-contact").show();
+				}
+			}
+		}
+	});
+}
+function deleteActivite (){
+	//suppresion d'un code d'activite
+	$("body").on("click", ".btn-supprimer-code-activite", function(event) {
+		event.preventDefault();
+		$this = $(this);
+		message = " Voulez-vous vraiment supprimer ce code d'activit&eacute; ?";
+	
+		showConfirmationPopup(message, "Merci de confirmer la suppression.", function () { });
+	});
+}
+function strikethroughManager (){
+	//barrer l'ancienne valeur du responsable  cas de suppression 
+	$("body").on("click", ".btn-barrer-responsable", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+	
+		var row = $this.parents(".un-contact");
+		row.find("span.old-data").css("text-decoration-line", "line-through");
+		row.find(".changeable").css("text-decoration-line", "line-through");
+		row.addClass("delete-true");
+	
+		$("input[name='contact_" + buttonId[buttonId.length - 1] + "_dirty" + "']").val("1");
+		$(this).hide();
+		$this.siblings('.btn-restaurer-responsable').show();
+	
+	});
+}
+function restoreManager (){
+	//restaurer l'ancienne valeur du responsable  (apres suppression) 
+	$("body").on("click", ".btn-restaurer-responsable", function(e) {
+		event.preventDefault();
+		$this = $(this);
+	
+		var buttonId = $this.attr("id").split('-');
+	
+		var row = $this.parents(".un-contact");
+		row.find("span.old-data").css("text-decoration-line", "none");
+		row.find(".changeable").css("text-decoration-line", "none");
+	
+		row.removeClass("delete-true");
+	
+		$("input[name='contact_" + buttonId[buttonId.length - 1] + "_dirty" + "']").val("0");
+		$(this).hide();
+		$this.siblings('.btn-barrer-responsable').show();
+	
+	});
+}
+function modifyManager (){
+	//modifier l'ancienne valeur  responsable
+	$("body").on("click", ".modifier-responsable", function(e) {
+		event.preventDefault();
+	
+		$(this).closest('.un-contact').find('.old-data').hide();
+		$(this).closest('.un-contact').find('.changeable').show();
+	
+	});
+}
+function editManager (){
+	//controle des champs obligatoires pour le bloc Dirigeants de l'entreprise
+	$("body").on("change", ".edit-data-responsable", function(e) {
+		var isEmpty = 0;
+		var element = $(this).closest('.un-contact').find('.requiered-field-responsable');
+	
+		element.each(function() {
+			if ($(this).val().trim() != "")
+				isEmpty = isEmpty + 1;// incrementer si le champs n'est pas vide
+			else
+				isEmpty = 0;
+		});
+		if (isEmpty == element.length)
+			$(this).parent().siblings().children('.requiered-field').val("0");
+	
+		else
+			$(this).parent().siblings().children('.requiered-field').val("1");
+	
+	
+	});
+}
+function saveContribFicheSociete () {
+	$('#btnSaveContribEnt').click(function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		// Verifier que les champs obligatoires sont remplis
+		var sum = 0;
+		$(".requiered-field").each(function() {
+			sum += +$(this).val();
+			console.log(sum);
+		});
+		$(".all-requiered-fields").val(sum);
+	
+		if ($(".dirtyfield[value=1]").length == 0) {
+			showNotificationPopup("warning", "Aucune modification n'a été apportée à la fiche. Veuillez saisir les informations avant de cliquer sur le bouton \"Enregistrer\"");
+	
+			$("#edit-fiche-form").bind("click", function() {
+				$("#edit-fiche-form").bind("click");
+			});
+		}
+		else if ($(".all-requiered-fields").val() != "0") {
+			showNotificationPopup("warning", "Veuillez remplir les champs obligatoires (*) dans la rubrique \"Dirigeants de l'entreprise\"");
+	
+		}
+		else {
+			$.blockUI({ message: '', overlayCSS: { backgroundColor: 'transparent' } });
+			$this.parent("div:first").find(".ajax-loader-small").show();
+		
+			$(".delete-true").remove();
+		
+			$.ajax({
+				type: "POST",
+				url: "societe-contribEnt",
+				data: $("#edit-fiche-form").serialize(),
+				timeout: 600000,
+				success: function(data) {
+					if (idMktUser != null && maxBOUser > idMktUser) {
+		
+						showNotificationPopup("success", "Vos modifications ont  bien &eacute;t&eacute; enregistr&eacute;es.");
+		
+						$.unblockUI();
+						setTimeout(function() {
+						document.location.reload();
+						}, 2000);
+						$('.containerToggle').hide();
+						$('div#fiche').show();
+						//gestion des blocs à droite
+						$('#contribution-info').hide();
+						$('.pubicite-right').show();
+		
+		
+					} else {
+						$.unblockUI();
+						$('.containerToggle').hide();
+						$('#confirm-contrib').show();
+						//gestion des blocs à droite
+						$('#contribution-info').hide();
+						$('.pubicite-right').show();
+						document.body.scrollTop = 0;
+						document.documentElement.scrollTop = 0;
+					}
+		
+					$("#edit-fiche-form").reset();
+		
+				},
+				error: function(request, errorType, errorThrown) {
+					$this.parent("div:first").find(".ajax-loader-small").hide();
+					$.unblockUI();
+					showNotificationPopup("error", messages.erreur_serveur);
+				}
+			});
+		}
+	
+		return false;
+	});
+}
+//callback function to bring a hidden box back
+function doCancelContribFicheSociete () {
+
+	$('.containerToggle').hide();
+	$('div#fiche').show();
+	//gestion des blocs à droite
+	$('#contribution-info').hide();
+	$('.pubicite-right').show();
+	$('.addedTag').remove();
+	$("#edit-fiche-form").reset();
+	document.body.scrollTop = 0;
+	document.documentElement.scrollTop = 0;
+	return false;
+
+}
+function cancelContribFicheSociete () {
+	$('#btn-cancel-contrib-ent').click(function(e) {
+		e.preventDefault();
+		// s'il y a une modification
+		if ($(".dirtyfield[value=1]").length == 0) {
+			//gestion des blocs au centre
+			$('.containerToggle').hide();
+			$('div#fiche').show();
+			//gestion des blocs à droite
+			$('#contribution-info').hide();
+			$('.pubicite-right').show();
+			$('.addedTag').remove();
+			document.body.scrollTop = 0;
+			document.documentElement.scrollTop = 0;
+		}
+		else {
+			message = "<b>Attention!</b> <br> Les informations que vous avez saisies ne seront pas enregistrées. Confirmez-vous l'annulation?";
+			showConfirmationPopup(message, "", doCancelContribFicheSociete);
+		}
+		return false;
+	});
+}
+function goToTheNextSociete (){
+	$("body").on("click", ".next-societe", function(e) {
+		e.preventDefault();
+	
+		window.location = "societe-backoffice-next";
+		return false;
+	});
+}
+/*--------------Map fiche----------- */
+function initModalMapFiche (){
+	if (idMktUser != null) {
+		$("#modal-map").iziModal({
+			title: "Plan d'accés",
+			subtitle: "Vous pouvez ajuster l'emplacement exact de votre entreprise sur la carte en déplaçant le curseur bleu.",
+			icon: "globeicon-",
+			history: false,
+			autoOpen: false,
+			timeoutProgressbar: true,
+			timeoutProgressbarColor: "white",
+			arrowKeys: true,
+			width: 900,
+			zindex: 1000,
+			iframeHeight: 800,
+			restoreDefaultContent: true,
+			loop: true,
+			fullscreen: true,
+			onFullscreen: function(modal) {
+				if (modal.isFullscreen)
+					$("#modal-map #map-leaflet-1").css("min-height", "48em")
+				else
+					$("#modal-map #map-leaflet-1").css("min-height", "30em")
+			}
+		});
+	}
+}
+function initModalMapFicheMobile (){
+	var subtitle = "";
+	if (idMktUser != null)
+		subtitle = "Vous pouvez ajuster l'emplacement exact de votre entreprise sur la carte en déplaçant le curseur bleu.";
+	
+	$("#modal-map").iziModal({
+		autoOpen: false,
+		width: 320,
+		zindex: 1000,
+		iframeHeight: 500,
+		restoreDefaultContent: true,
+		loop: true,
+		fullscreen: true,
+		onFullscreen: function(modal) {
+			if (modal.isFullscreen)
+				$("#modal-map #map-leaflet-1").css("min-height", "48em")
+			else
+				$("#modal-map #map-leaflet-1").css("min-height", "30em")
+		}
+	});
+}
+function updateLatLngFiche(lat, lng, reverse) {
+	if (reverse) {
+		$("#btn-save-localisation").show();
+		markerFiche.setLatLng([lat, lng]);
+		mapFiche.panTo([lat, lng]);
+	} else {
+		document.getElementById('latitude').value = markerFiche.getLatLng().lat;
+		document.getElementById('longitude').value = markerFiche.getLatLng().lng;
+		mapFiche.panTo([lat, lng]);
+	}
+}
+function callbackGeocodageFiche(lat, lon) {
+	var curPos = markerFiche.getLatLng();
+	mapFiche.panTo([curPos.lat, curPos.lng]);
+	mapPlat.panTo([curPos.lat, curPos.lng]);
+	if (markerFiche != null) {
+		markerFiche.setLatLng([curPos.lat, curPos.lng]).update();
+		markerMapPlat.setLatLng([curPos.lat, curPos.lng]).update();
+	}
+	else {
+		markerFiche = L.marker([curPos.lat, curPos.lng]).addTo(mapFiche);
+		markerMapPlat = L.marker([curPos.lat, curPos.lng]).addTo(mapPlat);
+	}
+
+	markerFiche.dragging.disable();
+	mapFiche.setZoom(13);
+
+	$("#fiche").fadeIn(1500);
+
+	$('div#map-leaflet-1').unblock();
+
+	if (idMktUser != null && maxBOUser < idMktUser)
+		//pour une contibution 
+		showNotificationPopup("success", "Merci pour votre contribution. Nous vous enverrons un mail une fois qu'elle sera trait&eacute;e. ");
+	else
+		//pour une contibution 
+		showNotificationPopup("success", "La position a bien &eacute;t&eacute; enregistr&eacute;e");
+
+
+	$("#btn-save-localisation").hide();
+	$('#modal-map').iziModal('close');
+}
+function initializeMapFichePlat(latitude, longitude, withMarker) {
+	var zoom = 6;
+	if (withMarker)
+		zoom = 13;
+	mapPlat = L.map('map-leaflet-2').setView([latitude, longitude], zoom);
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY2hhcmlrYW1hcCIsImEiOiJja3J2dnJpemEwYW1vMndvMmFnYjkxNnk5In0.jDWbp0qTkilQoI3VQoUP6Q', {
+		maxZoom: 18,
+		id: 'mapbox/streets-v11'
+	}).addTo(mapPlat);
+
+	if (withMarker)
+		markerMapPlat = L.marker([latitude, longitude]).addTo(mapPlat)
+			.bindPopup(latitude + ' <strong>:</strong> ' + longitude);
+}
+function initializeMapFichePopup(latitude, longitude, withMarker, withlayer) {
+	mapFiche = L.map('map-leaflet-1').setView([latitude, longitude], 15);
+	var osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY2hhcmlrYW1hcCIsImEiOiJja3J2dnJpemEwYW1vMndvMmFnYjkxNnk5In0.jDWbp0qTkilQoI3VQoUP6Q', {
+		maxZoom: 18,
+		id: 'mapbox/streets-v11'
+	}).addTo(mapFiche);
+	
+	if (withlayer){
+		var drawnItems = L.featureGroup().addTo(mapFiche);
+		L.control.layers({
+			"osm": osm.addTo(mapFiche),
+			"google": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}')
+		}, { 'drawlayer': drawnItems }, { position: 'bottomright', collapsed: false }).addTo(mapFiche);	
+	}
+
+
+	if (withMarker) {
+		if (idMktUser != null){
+			markerFiche = L.marker([latitude, longitude], {
+				draggable: true
+			}).addTo(mapFiche);
+		}
+		else {
+			markerFiche = L.marker([latitude, longitude], {
+				draggable: false
+			}).addTo(mapFiche);
+		}
+		
+		
+		//.bindPopup(latitude+' <strong>:</strong> '+longitude);
+
+		updateLatLngFiche(latitude, longitude);
+		
+		if (idMktUser != null){
+			markerFiche.on('dragend', function(e) {
+				$("#btn-save-localisation").show();
+				markerMoved = true;
+				updateLatLngFiche(markerFiche.getLatLng().lat, markerFiche.getLatLng().lng);
+			});			
+		}
+		
+		markerFiche.on("click", function(e) {
+			markerFiche.setLatLng(e.latlng);
+			updateLatLngFiche(markerFiche.getLatLng().lat, markerFiche.getLatLng().lng);
+		});
+			
+
+		
+	}
+	else {
+		mapFiche.addControl(new L.Control.Draw());
+	}
+
+	// Truncate value based on number of decimals
+	var _round = function(num, len) {
+		return Math.round(num * (Math.pow(10, len))) / (Math.pow(10, len));
+	};
+	// Helper method to format LatLng object (x.xxxxxx, y.yyyyyy)
+	var strLatLng = function(latlng) {
+		return "(" + _round(latlng.lat, 6) + ", " + _round(latlng.lng, 6) + ")";
+	};
+
+	// Generate popup content based on layer type
+	// - Returns HTML string, or null if unknown object
+	var getPopupContent = function(layer) {
+		// Marker - add lat/long
+		if (layer instanceof L.Marker || layer instanceof L.CircleMarker)
+			return strLatLng(layer.getLatLng());
+		return null;
+	};
+
+	// Fermer le popup
+	$("body").on("click", "#btn-close-localisation", function() {
+		$('#modal-map').iziModal('close');
+	});
+
+	// Sauvegarder la localisation
+	$("body").on("click", "#btn-save-localisation", function() {
+		var curPos = markerFiche.getLatLng();
+		mapFiche.panTo([curPos.lat, curPos.lng]);
+		$.ajax
+		({
+			type: "POST",
+			url: "societe-localisation",
+			data: "lattitude=" + curPos.lat + "&longitude=" + curPos.lng + "&entid=" + $("input.entid").val() + "&bilid=" + $("input.bilid").val(),
+			timeout: 600000,
+			success: function(data) {
+				callbackGeocodageFiche(curPos.lat, curPos.lng);
+			},
+			error: function(request, errorType, errorThrown) {
+				showNotificationPopup("error", messages.erreur_serveur);
+			}
+		});
+	});
+}
+function onClickUpdateLogoSociete () {
+	if (idMktUser == null) {
+		$("body").on("click", ".service-edit-logo", function(e) {
+			e.preventDefault();
+	
+			if (!userConnected()) return false;
+	
+		});
+	}
+}
+function doReviewPaging(pageSize) {
+	var nombreReview = jQuery("#list-review").find(".review-wrapper").length;
+
+	if (nombreReview > 0) {
+		$('.pagination').show();
+		$(".no-comment-found").hide();
+		$(".comment-found").show();
+		jQuery(".nombre-commentaire").html(nombreReview + " commentaire" + ((nombreReview > 1) ? 's' : '') + "  ");
+	}
+	else {
+		$('.pagination').hide();
+		$(".no-comment-found").show();
+		$(".comment-found").hide();
+	}
+}
+function refreshStars() {
+	$('.star').each(function(star) {
+		var x = eval('(' + $(this).children('.returnedJson').html() + ')');
+		$(this).raty({
+			readOnly: true,
+			score: x ? x.note : 0,
+			space: false
+		});
+
+		var review = $(this).parents(".review");
+
+		review.find(".note1-existe").hide();
+		review.find(".note2-existe").hide();
+		review.find(".note3-existe").hide();
+		review.find(".note4-existe").hide();
+
+		var ratingSpecifiqueExiste = false;
+		if (x.note1 && x.note1 != "0") {
+			ratingSpecifiqueExiste = true;
+
+			review.find(".note1-existe").show();
+			review.find(".note1").raty(
+				{
+					readOnly: true,
+					score: x ? x.note1 : 0,
+					space: false
+				});
+		}
+
+		if (x.note2 && x.note2 != "0") {
+			ratingSpecifiqueExiste = true;
+
+			review.find(".note2-existe").show();
+			review.find(".note2").raty(
+				{
+					readOnly: true,
+					score: x ? x.note2 : 0,
+					space: false
+				});
+		}
+
+		if (x.note3 && x.note3 != "0") {
+			ratingSpecifiqueExiste = true;
+
+			review.find(".note3-existe").show();
+			review.find(".note3").raty(
+				{
+					readOnly: true,
+					score: x ? x.note3 : 0,
+					space: false
+				});
+		}
+
+		if (x.note4 && x.note4 != "0") {
+			ratingSpecifiqueExiste = true;
+
+			review.find(".note4-existe").show();
+			review.find(".note4").raty(
+				{
+					readOnly: true,
+					score: x ? x.note4 : 0,
+					space: false
+				});
+		}
+
+		if (!ratingSpecifiqueExiste) {
+			review.find(".rating-specifique").remove();
+		}
+	});
+}
+function initFormCommentStars() {
+	$('.note-rating').raty({
+		space: false
+	});
+
+	$('.note-rating-1').raty({
+		space: false
+	});
+
+	$('.note-rating-2').raty({
+		space: false
+	});
+
+	$('.note-rating-3').raty({
+		space: false
+	});
+
+	$('.note-rating-4').raty({
+		space: false
+	});
+}
+function setScoreReview (){
+	$(".review-container .rate").raty({
+		size: 30,
+		starType: 'i',
+		hints: ['Horrible', 'Médiocre', 'Moyen', 'Très bien', 'Excellent'],
+		click: function(score, evt) {
+			$(this).parent().find('input').val(score);
+		}
+	});
+}
+function addSubReview (){
+	$(".review-container").find(".add-review, .add-subreview").click(function() {
+		if (userConnected()) {
+			if ($(this).hasClass("add-review")) {
+				$("#review-fiche .add-review").hide();
+				$(".review-container .review-new").show();
+				if ($(".review-container .review").length > 0)
+					$(".review-container .review-new .annuler").show();
+			}
+		}
+	});
+}
+function submitReview (){
+	$(".review-container .envoyer").click(function(e) {
+		var denomination = $("input.denomination").val() == undefined ? "" : $("input.denomination").val();
+		var bilid = $("input.bilid").val() == undefined ? "" : $("input.bilid").val();
+		var entid = $("input.entid").val() == undefined ? "" : $("input.entid").val();
+		var idArticle = $("input.idArticle").val() == undefined ? "" : $("input.idArticle").val();
+		var titreArticle = $("input.titreArticle").val() == undefined ? "" : $("input.titreArticle").val();
+		
+	
+		var $form = $("#post-review");
+		sessionStorage.setItem("charika-review-form", JSON.stringify($form.serializeArray()));
+		if (userConnected()) {
+			sessionStorage.removeItem("charika-review-form");
+			if ($form[0].checkValidity && !$form[0].checkValidity()) {
+				$(".review-container .form-error").text("Veuillez écrire au moins un titre et un commentaire avant de l'envoyer").show();
+				return;
+			}
+			var noteGlob = $form.find("input[name=note]").val();
+			if (typeof noteGlob == undefined || Number(noteGlob) <= 0) {
+				$(".review-container .form-error").text("Il faut renseigner une note globale pour la société").show();
+				$(".review-container form .rating").addClass("isrequired").find("h4").addClass("animate-flicker");
+				return;
+			}
+			$(".review-container .form-error").hide();
+			$(".review-container .isrequired").removeClass("isrequired").find("h4").removeClass("animate-flicker");
+	
+			var type = 0;
+			if (page != null && page == 'actualites-article') {
+				if (source != null && source == 'inforisk')
+					type = 3;
+				else
+					type = 2;
+			}
+			else {
+				type = 1;
+			}
+	
+			$.blockUI({ message: '<img style="width: 20px; margin-right: 5px" src="mosaic_img/ajax-loader-60.gif">Publication du commentaire en cours...', css: { height: "50px", paddingTop: "12px" } });
+			$.post("ratingcmt-comment?bilid=" + bilid + "&entid=" + entid + "&denomination=" + denomination + "&titreArticle=" + titreArticle + "&idArticle=" + idArticle + "&type=" + type + "&"
+				+ $form.serialize()).done(function(r) {
+					if (r) {
+						$(".review-container .review-new").hide();
+						$("#review-fiche .add-review").show();
+	
+						var nbAvis = Number($('<div>' + r + '</div>').find(".nbcmt").val());
+						var moy = Number($('<div>' + r + '</div>').find(".moynote").val());
+	
+						$(".global-rating .note").text((moy.toFixed(1) + "").replace(".", ","));
+						$(".global-rating .nb-avis").text("(" + nbAvis + " avis)")
+						$(".global-rating .rating i").each(function(i, it) {
+							if (i + 1 <= moy)
+								$(it).removeClass("star-off-png").addClass("star-on-png");
+							else
+								$(it).removeClass("star-on-png").addClass("star-off-png");
+						});
+	
+						var $div = $('<div>' + r + '</div>');
+						$div.find(".nbcmt, .moynote").remove();
+						r = $div.html();
+						$(".review-container .reviews").prepend(r);
+	
+						$.unblockUI();
+					}
+				}).fail(function() {
+					$.unblockUI();
+					showNotificationPopup("error", messages.erreur_serveur);
+				});
+		}
+	});
+}
+function cancelAddingReview (){
+	$(".review-container .annuler").click(function() {
+		var $container = $(this).closest(".review-new");
+		if ($container.hasClass("review-new") && $(".review-container .review").length == 0)
+			return;
+		$container.hide().find("input, textarea").val("");
+		$("#review-fiche .add-review").show();
+	});
+}
+function openModalAddNameReview (){
+	$(".user-publisher .nomprenom.modify").click(function() {
+		showModal("user-change-name");
+	});
+}
+function submitAddingNameReview (){
+	$("#user-change-name").find(".valider, .annuler").click(function(e) {
+		e.preventDefault();
+		if ($(this).hasClass("annuler")) {
+			hideModal("user-change-name");
+		}
+		else {
+			var $form = $(this).closest("form");
+			if (userConnected()) {
+				if ($form[0].checkValidity && !$form[0].checkValidity()) {
+					$form.find(".form-error").text("Merci de vérifier les données saisies").show();
+					return;
+				}
+				$form.find(".form-error").hide();
+	
+				$.blockUI({ message: '<img style="width: 20px; margin-right: 5px" src="mosaic_img/ajax-loader-60.gif">Traitments en cours...', css: { height: "50px", paddingTop: "12px" } });
+				$.post("user-updateprofile?bilid=" + $("input.bilid").val() + "&entid=" + $("input.entid").val() + "&" + $form.serialize()).done(function(r) {
+					if (r.success) {
+						$(".user-publisher .nomprenom").text("(" + r.nom + " " + r.prenom + ")");
+						hideModal("user-change-name");
+					}
+					$.unblockUI();
+				}).fail(function() {
+					showNotificationPopup("error", messages.erreur_serveur);
+					$.unblockUI();
+				});
+			}
+		}
+	});
+}
+function initCharikaReviewFormStorage (){
+	if (idMktUser != null) {
+		var reviewFormData = sessionStorage.getItem("charika-review-form");
+		sessionStorage.removeItem("charika-review-form");
+		if (reviewFormData) {
+			var data = {};
+			JSON.parse(reviewFormData).forEach(function(it) {
+				data[it.name] = it.value;
+			});
+			$("#post-review textarea[name=comment]").val(data.comment);
+			$("#post-review input[name=titre]").val(data.titre);
+			$("#post-review .rate").each(function(i, it) {
+				var i, $it = $(it), name = $it.siblings("input").attr("name");
+				$it.siblings("input").val(data[name]);
+				$it.find("input").val(data[name]);
+				for (i = 1; i <= 5; i++)
+					if (i <= data[name])
+						$it.find("i:nth-child(" + i + ")").removeClass("star-off-png").addClass("star-on-png");
+			});
+		}
+	}
+	else
+		sessionStorage.removeItem("charika-review-form");	
+}
+
+if (pageid == "fiche-societe-national"){
+	var mob = (mobile == 0 ? false : true);
+	
+	var mapFiche, markerFiche, mapPlat, markerMapPlat;
+	var markerMoved = false;
+	
+	formatPhoneNumber("marketingInfoTelFax", "-");
+	initFicheSociete ();
+	editFiche ();
+	showRcIceFiche ();
+	traceShareFiche ();
+	
+	initSliderFiche ();
+	onClickUpdateLogoSociete ();
+	downloadReportExample ();
+	
+	if( mobile ){
+		initModalMapFicheMobile ();
+		openModalMapFicheMobile ();
+	}
+	else {
+		directDownloadNationalReport ();
+		initializeMapFichePlat($("input.latitude").val(), $("input.longitude").val(), $("input.withmarker").val());
+		openModalMapFiche ();
+		initModalMapFiche ();
+		openModalAddNameReview ();
+		submitAddingNameReview ();
+	}
+	
+	addReview ();
+	//afficher les 5 premiers commentaires
+	doReviewPaging(DEFAULT_PAGE_SIZE);
+	refreshStars();
+	//initFormCommentStars();
+	setScoreReview ();
+	addSubReview ();
+	submitReview ();
+	initCharikaReviewFormStorage ();
+	
+	addNationalReportToCart ();
+	orderNationalReport ();
+	checkAvailablityOfReport ();
+	hideModalAvailablityOfReport ();
+	
+	var indexTel = 1, indexFax = 0, indexMail = 1, indexWeb = 0, indexContact = 0, indexResponsables = 1;
+	
+	manageDirtyInputs ();
+	selectCodeSegmentEffectif ();
+	manageRadioEffectif ();
+	addPhone (mob);
+	addFax (mob);
+	addMail (mob);
+	addWebsite (mob);
+	deletePhone (mob);
+	deleteFax (mob);
+	deleteMail (mob);
+	deleteWebsite (mob);
+	strikethroughPhone ();
+	strikethroughFax ();
+	strikethroughMail ();
+	strikethroughWebsite ();
+	restorePhone ();
+	restoreFax ();
+	restoreMail ();
+	restoreWebsite ();
+	modifyPhone ();
+	modifyFax ();
+	modifyMail ();
+	modifyWebsite ();
+	addManager ();
+	deleteManager ();
+	deleteActivite ();
+	strikethroughManager ();
+	restoreManager ();
+	modifyManager ();
+	editManager ();
+	saveContribFicheSociete ();
+	cancelContribFicheSociete ();
+}

@@ -1,0 +1,1453 @@
+/*-------------- variables globales----------- */
+// GET PAGE ID
+var pageid = $("body").data("page");
+var page = $("input#page").val() != 'null' ? $("input#page").val() : null;
+var layout = $("#layout").val() != 'null' ? $("#layout").val() : null;
+var action = $("input#actionServer").val() != 'null' ? $("input#actionServer").val() : null;
+var idMktUser = $("input#idUser").val() != 'null' ? $("input#idUser").val() : null;
+var doDisconnect = $("input#doDisconnect").val();
+var hideRappelPopup = $("input#hideRappelPopup").val() != 'null' ? $("input#hideRappelPopup").val() : null;
+var isNewUser = $("input#isNewUser").val() != 'null' ? $("input#isNewUser").val() : null;
+var mobile = parseInt($("input#mobile").val());
+var maxPortfolios = 55; // le maximum des portefeuilles par user
+var maxfiche = 3000; // le maximum des fiches entreprises par fichier
+var minfiche = 100; // le minimum des fiches entreprises par fichier
+var minBudget = 1200; var maxBudget=18000; // max et min pour le budget des fichiers de prospect
+var DEFAULT_PAGE_SIZE = 10;
+var maxBOUser = 1000;
+var isLoggedIn = idMktUser != null ? true : false;
+var ruleRegex = /^(.+?)\[(.+)\]$/,
+	numericRegex = /^[0-9]+$/,
+	integerRegex = /^\-?[0-9]+$/,
+	decimalRegex = /^\-?[0-9]*\.?[0-9]+$/,
+	emailRegex = /^[a-zA-Z0-9.!#$%&amp;'*+\-\/=?\^_`{|}~\-]+@[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)*$/,
+	alphaRegex = /^[a-z]+$/i,
+	alphaNumericRegex = /^[a-z0-9]+$/i,
+	alphaDashRegex = /^[a-z0-9_\-]+$/i,
+	naturalRegex = /^[0-9]+$/i,
+	naturalNoZeroRegex = /^[1-9][0-9]*$/i,
+	ipRegex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})$/i,
+	base64Regex = /[^a-zA-Z0-9\/\+=]/i,
+	numericDashRegex = /^[\d\-\s]+$/,
+	urlRegex = /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
+	
+var activitiesStored = "";
+/*-------------- fonctions communes----------- */
+$.urlParam = function(name) {
+	var results = new RegExp("[\?&]" + name + "=([^&#]*)").exec(window.location.href);
+	if (results == null) {
+		return null;
+	}
+	return decodeURI(results[1]) || 0;
+}
+
+jQuery.fn.reset = function() {
+	$(this).each(function() { this.reset(); });
+}
+
+function isMobile() {
+	try {
+		if (/Android|webOS|iPhone|iPad|iPod|pocket|psp|kindle|avantgo|blazer|midori|Tablet|Palm|maemo|plucker|phone|BlackBerry|symbian|IEMobile|mobile|ZuneWP7|Windows Phone|Opera Mini/i.test(navigator.userAgent)) {
+			return true;
+		};
+		return false;
+	} catch (e) { return false; }
+}
+
+function detectmobile() {
+	// Seem legit
+	var check = ('DeviceOrientationEvent' in window || 'orientation' in window);
+	// But with my Chrome on windows, DeviceOrientationEvent == fct()
+	if (/Windows NT|Macintosh|Mac OS X|Linux/i.test(navigator.userAgent)) check = false;
+	// My android have "linux" too
+	if (isMobile()) check = true;
+
+	return check;
+}
+
+function clear_form_elements(ele) {
+
+    $(ele).find(':input').each(function() {
+        switch(this.type) {
+            case 'password':
+            case 'select-multiple':
+            case 'select-one':
+            case 'select':
+            case 'text':
+            case 'number':
+            case 'date':
+            case 'textarea':
+                $(this).val('');
+                break;
+            case 'checkbox':
+            case 'radio':
+                this.checked = false;
+        }
+    });
+
+}
+
+function capitalizeFirstLetter(string){
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function isBlank(str) {
+	return (!str || /^\s*$/.test(str));
+}
+
+function isDirty($form) {
+	var isDirty = false;
+
+	$form.find("input, select, textarea").each(function() {
+		var $field = $(this);
+
+		var value = $field.val();
+
+		var defaultValue = $field[0].defaultValue;
+
+		if (value != defaultValue) {
+			isDirty = true;
+		}
+	});
+
+	return isDirty;
+}
+
+function getTextWidth(text, font) {
+	// re-use canvas object for better performance
+	var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+	var context = canvas.getContext("2d");
+	context.font = font;
+	var metrics = context.measureText(text);
+	return metrics.width;
+}
+
+function isValidEmailAddress(emailAddress) {
+	var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+	return pattern.test(emailAddress);
+}
+
+jQuery.fn.ForceNumericOnly = function() {
+	return this.each(function() {
+		$(this).keydown(function(e) {
+			var key = e.charCode || e.keyCode || 0;
+			// allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+			// home, end, period, and numpad decimal
+			return (
+				key == 27 ||
+				key == 8 ||
+				key == 9 ||
+				key == 13 ||
+				key == 46 ||
+				key == 110 ||
+				key == 188 ||
+				key == 190 ||
+				(key === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+				(key === 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+				(key === 86 && (e.ctrlKey === true || e.metaKey === true)) ||
+				(key === 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+				(key >= 35 && key <= 40) ||
+				(key >= 48 && key <= 57 && e.shiftKey === true) ||
+				(key >= 96 && key <= 105));
+		});
+	});
+}
+
+function formatValeur(nombre) {
+	nombre += '';
+	var valeur = nombre.replace(',', '.').split('.');
+	valeur[0] = valeur[0];
+	valeur[1] = valeur[1];
+	var sep = ' ';
+	var reg = /(\d+)(\d{3})/;
+	while (reg.test(valeur[0])) {
+		valeur[0] = valeur[0].replace(reg, '$1' + sep + '$2');
+	}
+	return valeur.join('');
+}
+
+function replaceAll(string, search, replace) {
+	return string.split(search).join(replace);
+}
+
+function formatPhoneNumber(selector, separator) {
+	$('.' + selector).text(function(i, text) {
+		return text.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, "$1" + separator + "$2" + separator + "$3" + separator + "$4" + separator + "$5");
+	});
+}
+function showModal (id){
+	$("#"+id).modal("show");
+}
+function hideModal (id){
+	$("#"+id).modal("hide");
+}
+function userConnected() {	
+	if (!isLoggedIn) {
+		$(".authentification-required").show();
+		
+		$("#widtget-inscription .innerR").hide();
+		$(".bloc-connexion").show();
+		showModal("modal-user");
+	}
+	else
+		return true;
+
+	return false;
+}
+function isBackofficeUser(u) {
+	if (u.id < 1000)
+		return true;
+	return false;
+}
+function reloadPage() {
+	if (document.location.href.indexOf("user-disconnect") >= 0) {
+		document.location.href = "/";
+	}
+	else {
+		document.location.reload();
+	}
+}
+function removeYoutubeLink (){
+	$('.article-inforisk-content').html(function(i, html) {
+		return html.replace(/(?:https:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?.*v=)?(\w+)/g, '');
+	});
+}
+/*-------------- validation methodes----------- */
+jQuery.extend(jQuery.validator.messages, {
+	required: "Ce champ est obligatoire.",
+	remote: "Veuillez corriger ce champ.",
+	email: "Veuillez saisir une adresse e-mail valide.",
+	url: "Veuillez saisir une URL valide.",
+	date: "Veuillez saisir une date valide.",
+	dateISO: "Veuillez saisir une date valide (ISO).",
+	number: "Veuillez saisir un numéro valide.",
+	digits: "Veuillez saisir uniquement des chiffres.",
+	creditcard: "Veuillez saisir un numéro de carte de crédit valide.",
+	equalTo: "Veuillez saisir à nouveau la même valeur.",
+	accept: "Veuillez saisir une valeur avec une extension valide.",
+	maxlength: jQuery.validator.format("Veuillez ne pas saisir plus de {0} caractères."),
+	minlength: jQuery.validator.format("Veuillez saisir au moins {0} caractères."),
+	rangelength: jQuery.validator.format("Veuillez saisir une valeur comprise entre {0} et {1} caractères."),
+	range: jQuery.validator.format("Veuillez saisir une valeur comprise entre {0} et {1}."),
+	max: jQuery.validator.format("Veuillez saisir une valeur inférieure ou égale à {0}."),
+	min: jQuery.validator.format("Veuillez saisir une valeur supérieure ou égale à {0}.")
+});
+
+jQuery.validator.addMethod('filesize', function(value, element, param) {
+  return this.optional(element) || (element.files[0].size / 1024 / 1024 <= param)
+}, 'La taille du fichier doit être inférieure à {0} Mo');
+
+jQuery.validator.addMethod("checkemailEnt", function(email, element) {
+		var result = false;
+		$.ajax({
+			url: 'user-checkemailEnt',
+			method: 'post',
+			async: false,
+			data: {
+				email: email
+			},
+			dataType: 'json',
+			success: function(data) {
+				result = data.success;
+			}
+		});
+
+		return result;
+}, "Cet email est déjà utilisé");
+
+jQuery.validator.addMethod("checkemail", function(email, element) {
+	var result = false;
+	$.ajax(
+		{
+			url: 'user-checkemail',
+			method: 'post',
+			async: false,
+			data: { email: email },
+			dataType: 'json',
+			success: function(data) {
+				result = data.success;
+			}
+		});
+
+	return result;
+}, "Cet email est déjà utilisé.");
+
+
+jQuery.validator.addMethod("checkemailnewsletter", function(email, element) {
+	var result = false;
+	$.ajax(
+		{
+			url: 'newsletter-checkemail',
+			method: 'post',
+			async: false,
+			data: { email: email },
+			dataType: 'json',
+			success: function(data) {
+				result = data.success;
+			}
+		});
+
+	return result;
+}, "Cet email est déjà utilisé.");
+
+// validateur pour l'unicité du nom du portefeuille
+jQuery.validator.addMethod("checkNomPortefeuille", function(nomPortefeuille, element) {
+	var result = false;
+	$.ajax({
+		url: 'user-checkNomPortefeuille',
+		method: 'post',
+		async: false,
+		data: { nomPortefeuille: nomPortefeuille },
+		dataType: 'json',
+		success: function(data) {
+			result = data.success;
+		},
+		error: function(request,errorType,errorThrown) {
+			showNotificationPopup("error",messages.erreur_serveur);
+		}
+	});
+
+	return result;
+}, "Ce nom est déjà utilisé.");
+
+//validateur pour 
+jQuery.validator.addMethod("checkSameNamePortefeuille", function(nomPortefeuille, element) {
+	var result = true;
+	// si le nom du portefeuille existe déjà et il est different de l'ancien nom, le update est refusé
+	if (doCheckNomPortefeuille(nomPortefeuille) == false && nomPortefeuille != $("#nom_portefeuille_actuel").val())
+		result = false;
+	return result;
+}, "Ce nom est déjà utilisé.");
+
+jQuery.validator.addMethod("noSpace", function(value, element) {
+	return value == '' || value.trim().length != 0;
+}, "Ce champ ne doit pas être vide.");
+
+$.validator.addMethod('lessThanEqual', function(value, element, param) {
+	return this.optional(element) || parseInt(value) <= parseInt($(param).val());
+}, "La valeur {0} doit être inférieur à {1}");
+
+
+window.onscroll = function() {
+	var currentScrollPos = window.pageYOffset;
+	if (currentScrollPos == 0) {
+		$('.navbar #collapseThree').css('background', '');
+	}
+	else {
+		$('.navbar #collapseThree').css('background', '#01000040');
+	}
+}
+//(function($) {
+$(document).on('hidden.bs.modal', '.modal', function(e) {
+	$(document.body).removeClass('modal-scrollbar');
+	if (!isLoggedIn) {
+		currentService = null;
+	}
+
+}).on('show.bs.modal', '.modal', function() {
+	// Bootstrap's .modal-open class hides any scrollbar on the body, so if there IS a scrollbar on the body at modal open time, then
+	// add a right margin to take its place.
+	if ($(window).height() < $(document).height()) {
+		$(document.body).addClass('modal-scrollbar');
+	}
+});
+//})(window.jQuery);
+
+/*-------------- Communs----------- */
+function openModalFeedback (){
+	$(".btn-feedback-popup").click(function() {
+		showModal("feedback-modal");
+	});
+}
+function closeModalFeedBack (){
+	$("body").on("click", "#feedback-modal .closebtn", function() {
+		hideModal("feedback-modal");
+	});
+}
+function submitFormFeedback (){
+		$("body").on("submit", ".form-feedback", function() {
+			$this = $(this);
+			if (!$(this).valid()) {
+				return;
+			}
+	
+			$this.parent("div:first").find(".ajax-loader-small").show();
+	
+			$.ajax({
+				url: "feedback-sendmessage",
+				type: "POST",
+				data: $(this).serialize(),
+				context: this,
+				success: function(data) {
+					$this.parent("div:first").find(".ajax-loader-small").hide();
+					hideModal("feedback-modal");
+					$(".form-feedback")[0].reset();
+					showNotificationPopup("success", "Votre demande a bien été prise en compte. Nous allons y répondre dans les plus brefs délais. ");
+				},
+				error: function(request, errorType, errorThrown) {
+					$this.parent("div:first").find(".ajax-loader-small").hide();
+					hideModal("feedback-modal");
+					$(".form-feedback")[0].reset();
+	
+					showNotificationPopup("error", messages.erreur_serveur);
+				}
+			});
+	
+			return false;
+		});
+}
+function validateFormFeedback (){
+	$(".form-feedback").validate({
+		rules: {
+			nom: { required: true },
+			email: { email: true },
+			telephone: { minlength: 10 },
+			message: { required: true, minlength: 20 }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages:
+		{
+			nom: { required: "Saisissez votre nom" },
+			email: { required: "Saisissez votre email", email: "Email invalide" },
+			message: { minlength: "Votre message doit avoir au moins 20 caractères", required: "Saisissez votre message" },
+			telephone: { minlength: " Le téléphone doit avoir au moins 10 chiffres" }
+		}
+	});
+}
+function openModalSupport (){
+	$(".btn-support-popup").click(function() {
+		showModal("support-modal");
+	});
+}
+function closeModalSupport (){
+	$("body").on("click", "#support-modal .closebtn", function() {
+		hideModal("support-modal");
+	});
+}
+function submitFormSupport (){
+	$("body").on("submit", ".form-support", function() {
+		$this = $(this);
+		if (!$(this).valid()) {
+			return;
+		}
+
+		$this.parent("div:first").find(".ajax-loader-small").show();
+
+		$.ajax({
+			url: "support-sendmessage",
+			type: "POST",
+			data: $(this).serialize(),
+			context: this,
+			success: function(data) {
+				$this.parent("div:first").find(".ajax-loader-small").hide();
+				hideModal("support-modal");
+				$(".form-support")[0].reset();
+				showNotificationPopup("success", "Votre demande a bien été prise en compte. Nous allons y répondre dans les plus brefs délais. ");
+			},
+			error: function(request, errorType, errorThrown) {
+				$this.parent("div:first").find(".ajax-loader-small").hide();
+				hideModal("support-modal");
+				$(".form-support")[0].reset();
+
+				showNotificationPopup("error", messages.erreur_serveur);
+			}
+		});
+
+		return false;
+	});
+}
+function validateFormSupport (){
+	$(".form-support").validate({
+		rules: {
+			nom: { required: true },
+			email: { email: true },
+			telephone: { minlength: 10 },
+			message: { required: true, minlength: 20 }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages:
+		{
+			nom: { required: "Saisissez votre nom" },
+			email: { required: "Saisissez votre email", email: "Email invalide" },
+			message: { minlength: "Votre message doit avoir au moins 20 caractères", required: "Saisissez votre message" },
+			telephone: { minlength: " Le téléphone doit avoir au moins 10 chiffres" }
+		}
+	});
+}
+function openModalNewsLetter (){
+	$(".btn-newsletter-popup").click(function() {
+		showModal("newsletter-modal");
+	});
+}
+function closeModalNewsLetter (){
+	$("body").on("click", "#newsletter-modal .closebtn", function() {
+		hideModal("newsletter-modal");
+	});
+}
+function submitFormNewsLetter (){
+	$( "#newsletter-modal .form-check-input" ).on( "click", function() {
+		if($( "#newsletter-modal .form-check-input:checked" ).length == 2){
+			$('#newsletter-modal #form-submit-button').prop('disabled', false);
+		}
+		else {
+			$('#newsletter-modal #form-submit-button').prop('disabled', true);
+		}  
+	});
+
+
+
+	$("body").on("submit", ".form-newsletter", function() {
+		$this = $(this);
+		if (!$(this).valid()) {
+			return;
+		}
+
+		$this.parent("div:first").find(".ajax-loader-small").show();
+
+		$.ajax({
+			url: "newsletter-subscribe",
+			type: "POST",
+			data: $(this).serialize(),
+			context: this,
+			success: function(data) {
+				if (  data.success ){
+					$this.parent("div:first").find(".ajax-loader-small").hide();
+					hideModal("newsletter-modal");
+					$(".form-newsletter")[0].reset();
+					if ( data.newAccount == 1 ){
+						showNotificationPopup("success", "L'inscription à la Newsletter s'est bien déroulée. Pour activer votre compte, veuillez cliquer sur le lien de validation présent dans le mail que nous venons de vous envoyer.");
+					}
+					else {
+						showNotificationPopup("success", "Merci de vous être inscrit sur la newsletter charika.ma");
+					}
+				}
+			},
+			error: function(request, errorType, errorThrown) {
+				$this.parent("div:first").find(".ajax-loader-small").hide();
+				hideModal("newsletter-modal");
+				$(".form-newsletter")[0].reset();
+
+				showNotificationPopup("error", messages.erreur_serveur);
+			}
+		});
+
+		return false;
+	});
+}
+function validateFormNewsLetter (){
+	$("#form-newsletter").validate({
+		rules: {
+			email: { required: true, email: true, checkemailnewsletter: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+
+		messages: {
+			email:
+			{
+				required: "Saisissez votre email",
+				email: "L'email saisi est invalide",
+				checkemailnewsletter: "L'e-mail fourni est déjà utilisé par un autre utilisateur"
+			}
+		}
+	});
+}
+
+
+/*-------------- Inscription / Connexion----------- */
+function initConnexionPopup (){
+	if (idMktUser == null) {
+		Inputmask("99-99-99-99-99").mask("#form-inscription input[name=tel");
+		Inputmask("email").mask("#form-inscription input[name=email");
+		Inputmask("email").mask("#form-newsletter input[name=email");
+		Inputmask("email").mask("#form-reactivation input[name=email");
+		Inputmask("email").mask("#form-recover input[name=email");
+			
+	}
+}
+function resetForm () {
+	$("#modal-user form").reset();
+	$("#modal-user .val-form-erreur").removeClass("val-form-erreur");
+	$("#modal-user .error, #modal-user .callback").hide();
+}
+function validateFormRegister (){
+	$("#form-inscription").validate({
+		rules: {
+			email: { required: true, email: true, checkemail: true },
+			password: { required: true, minlength: 6 },
+			rpassword: { required: true, equalTo: "#password" }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+	
+		messages: {
+			email:
+			{
+				required: "Un email est nécessaire pour créer votre compte",
+				email: "L'email saisi est invalide",
+				checkemail: "L'e-mail fourni est déjà utilisé par un autre utilisateur"
+			},
+			password:
+			{
+				required: "Un mot de passe est nécessaire pour créer votre compte"
+			},
+			rpassword:
+			{
+				required: "Confirmez le mot de passe pour créer votre compte",
+				equalTo: "Le mot de passe saisi n'est pas identique à l'original"
+			}
+		}
+	});
+}
+function submitFormRegister () {
+	$("#form-inscription").bind("submit", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+
+		if (!$(this).valid())
+			return;
+	
+		$(".ajax-loader-hb").show();
+		$("#modal-user").block({ message: '', overlayCSS: { backgroundColor: 'transparent' } });
+	
+		$.ajax
+			({
+				type: "POST",
+				url: "user-subscribe",
+				data: $("#form-inscription").serialize(),
+				timeout: 600000,
+				success: function(data) {
+					$(".ajax-loader-hb").hide();
+					//			$("#callback-inscription").show();
+					showNotificationPopupCustom("success", "Votre compte a bien été créé. Veuillez consulter votre messagerie pour procéder à son activation. Merci de <span style='color: white;font-weight:bold;'>vérifier dans les SPAMS</span> si vous ne trouvez pas l'email dans votre boîte de réception");
+	
+					hideModal("modal-user");
+					
+					$("#modal-user").unblock();
+	
+				},
+				error: function(request, errorType, errorThrown) {
+					$("#modal-user").unblock();
+					$(".ajax-loader-hb").hide();
+					showNotificationPopup("error", "erreur sur le serveur");
+				}
+		});
+
+	});
+}
+function validateFormLogin (){
+	$("#form-connexion").validate({
+		onfocusout: true,
+		rules: {
+			username: { required: true },
+			password: { required: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+			username: {
+				required: "Un login est nécessaire pour vous authentifier"
+			},
+			password: {
+				required: "Un mot de passe est nécessaire pour vous authentifier"
+			}
+		}
+	
+	});
+}
+function doAfterLogin(user) {
+	hideModal("modal-user");
+	if (user.email)
+		$("#hidden-textfield-email").val(user.email);
+
+	reloadPage();
+
+	isLoggedIn = true;
+
+	var html = '';
+
+	$(".disconnected").hide();
+	$(".connected").show();
+}
+function submitFormLogin (){
+	$("#form-connexion").bind("submit", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+
+		if (!$(this).valid())
+			return;
+			
+		$(".ajax-loader-hb").show();
+	
+		$.ajax
+			({
+				type: "POST",
+				url: "user-login",
+				data: $("#form-connexion").serialize(),
+				timeout: 600000,
+				success: function(data) {
+					$(".ajax-loader-hb").hide();
+					if (data.success) {
+						isLoggedIn = true;
+	
+						/*** rafraichissement ***/
+						doAfterLogin(data);
+	
+					}
+					else {
+						if (data.error) {
+							$("#form-connexion ." + data.error).show();
+						}
+					}
+				},
+				error: function(request, errorType, errorThrown) {
+					$(".ajax-loader-hb").show();
+					showNotificationPopup("error", "erreur sur le serveur");
+				}
+			});
+	});
+}
+function validateFormForgotPassword (){
+	$("#form-recover").validate({
+		rules: {
+			email: { email: true, required: true },
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+	
+			email:
+			{
+				required: "Un email est nécessaire pour réinitialiser votre mot de passe",
+				email: "L'email saisi est invalide"
+			}
+		}
+	});
+}
+function submitFormForgotPassword (){
+	$("#form-recover").bind("submit", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+
+		if (!$(this).valid())
+			return;
+	
+		$(".ajax-loader-hb").show();
+		
+		$("#form-recover button").attr("disabled", true);
+		
+	
+		$.ajax
+			({
+				type: "POST",
+				url: "user-oublipassword",
+				data: $("#form-recover").serialize(),
+				timeout: 600000,
+				success: function(data) {
+					if (data.succes) {
+						$(".service-se-connecter").click();
+						$("#callback-oubliepassword").show();
+					}
+					else {
+						if (data.noEmailFound) {
+							$("#form-recover .error").hide();
+							$("#form-recover .error-0").show();
+						}
+						else if (data.notActivated) {
+							$("#form-recover .error").hide();
+							$("#form-recover .error-1").show();
+						}
+					}
+	
+					$(".ajax-loader-hb").hide();
+					$("#form-recover button").attr("disabled", false);
+				},
+				error: function(request, errorType, errorThrown) {
+					$(".ajax-loader-hb").hide();
+					$("#form-recover button").attr("disabled", false);
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			});
+	});
+}
+function validateFormReactivation (){
+	$("#form-reactivation").validate({
+		rules: {
+			email: { email: true, required: true },
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages: {
+	
+			email:
+			{
+				required: "Un email est nécessaire pour activation de votre compte",
+				email: "L'email saisi est invalide"
+			}
+		}
+	});
+}
+function submitFormReactivation (){
+	$("#form-reactivation").bind("submit", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+
+		if (!$(this).valid())
+			return;
+	
+		$(".ajax-loader-hb").show();
+		
+		$("#form-reactivation button").attr("disabled", true);
+	
+		$.ajax
+			({
+				type: "POST",
+				url: "user-renvoiactivationkey",
+				data: $("#form-reactivation").serialize(),
+				timeout: 600000,
+				success: function(data) {
+					if (data.succes) {
+						$(".service-se-connecter").click();
+						$("#callback-reactivation").show();
+					}
+					else {
+						if (data.noEmailFound) {
+							$("#form-reactivation .error").hide();
+							$("#form-reactivation .error-0").show();
+						}
+						else if (data.compteActive) {
+							$("#form-reactivation .error").hide();
+							$("#form-reactivation .error-1").show();
+						}
+					}
+	
+					$(".ajax-loader-hb").hide();
+					$("#form-reactivation button").attr("disabled", true);
+				},
+				error: function(request, errorType, errorThrown) {
+					$(".ajax-loader-hb").hide();
+					$("#form-reactivation button").attr("disabled", true);
+					showNotificationPopup("error", messages.erreur_serveur)
+				}
+			});
+	});
+}
+function onClickLoginModalAuth () {
+	$(".service-se-connecter").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+		
+		resetForm();
+		
+		$(".authentification-required").hide();
+		$(".bloc-recover").hide();
+		$(".bloc-reactivation").hide();
+		$(".bloc-inscription").hide();
+		$(".bloc-connexion").show("slide", { direction: "right" }, 400);
+	});
+}
+function onClickRegisterModalAuth () {
+	$(".service-sinscrire").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+		
+		resetForm();
+		
+		$(".bloc-connexion").hide();
+		$(".bloc-recover").hide();
+		$(".bloc-reactivation").hide();
+	
+		$(".bloc-inscription").show("slide", { direction: "right" }, 400);
+	});
+}
+function onClickForgotPasswordModalAuth () {
+	$(".service-recover").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+		
+		resetForm();
+		
+		$(".bloc-connexion").hide();
+		$(".bloc-reactivation").hide();
+	
+		$("#widtget-inscription form:visible").hide("slide", { direction: "left" }, 400);
+		$(".bloc-recover").show("slide", { direction: "right" }, 400);
+	});
+}	
+function onClickReactivateModalAuth () {
+	$(".service-reactivation").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+		
+		resetForm();
+		
+		$(".bloc-connexion").hide();
+		$(".bloc-recover").hide();
+	
+		$("#widtget-inscription form:visible").hide("slide", { direction: "left" }, 400);
+		$(".bloc-reactivation").show("slide", { direction: "right" }, 400);
+	});
+}
+function oncheckUncheckPrivacyPolicy (){
+	$('input[type="checkbox"]#acceptConditionVente').click(function() {
+		if ($(this).prop("checked") == true) {
+			$("#form-inscription button").attr("disabled", false);
+		}
+		else if ($(this).prop("checked") == false) {
+			$("#form-inscription button").attr("disabled", true);
+		}
+	});
+}
+
+
+/*-------------- Header Actions----------- */
+function onClickBtnLogin () {
+	$(".service-connexion").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();	
+
+		$(".authentification-required").hide();
+		
+		$("#widtget-inscription .innerR").hide();
+		$(".bloc-connexion").show();
+		showModal("modal-user");
+	});
+}
+function onClickBtnRegister () {
+	$(".service-inscription").bind("click", function(e) {
+		if (e && e.preventDefault) e.preventDefault();
+	
+		$("#widtget-inscription .innerR").hide();
+		$(".bloc-inscription").show();
+		showModal("modal-user");
+	});
+}
+function goToCartPage (){
+	$("body").on("click", ".userpanier", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "panier";
+		window.location.replace(href);
+	});
+}
+function redirectToOrdersPage (){
+	$( document ).ready(function() {
+	    if ($.urlParam('mode') != null && $.urlParam('mode') == "login") {
+			if (!isLoggedIn) {
+				$(".authentification-required").show();
+				
+				$("#widtget-inscription .innerR").hide();
+				$(".bloc-connexion").show();
+				showModal("modal-user");
+			}
+			var uri = window.location.toString();
+			if (uri.indexOf("?") > 0) {
+				var clean_uri = uri.substring(0, uri.indexOf("?"));
+				window.history.replaceState({}, document.title, clean_uri);
+			}
+		}
+	});
+}
+function goToNotifsPage (){
+	$("body").on("click", ".usernotifs", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-notifications";
+		window.location.replace(href);
+	});
+}
+function goToSurveillancePage (){
+	$("body").on("click", ".usersurveillance", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-surveillance";
+		window.location.replace(href);
+	});
+}
+function goToProfilePage (){
+	$("body").on("click", ".userprofil", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-profile";
+		window.location.replace(href);
+	});
+}
+function goToOrdersPage (){
+	$("body").on("click", ".userrapport", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "commandes";
+		window.location.replace(href);
+	});
+}
+function goToPortefeuillesPage (){
+	$("body").on("click", ".userPortefeuilles", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-portefeuilles";
+		window.location.replace(href);
+	});
+}
+function goToFichierProspectsPage (){
+	$("body").on("click", ".userfichier", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-fichiers";
+		window.location.replace(href);
+	});
+}
+function goToUserPositionnementPage(){
+	$("body").on("click", ".userpositionnement", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-positionnement";
+		window.location.replace(href);
+	});
+}
+
+function onClickBtnSearch (){
+	$('body').on('click', '.header-search-icon', function() {
+		if ($(this).hasClass('collapsed')) {
+			$('.form-box-header').removeClass('fadeOutUp');
+			$('.form-box-header').addClass('fadeInDown');
+		}
+		else {
+			$('.form-box-header').removeClass('fadeInDown');
+			$('.form-box-header').addClass('fadeOutUp');
+		}
+	});
+}
+function goToContributionsPage (){
+	//lien de contribution
+	$("body").on("click", ".userContribution", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected())
+			return;
+	
+		var href = "user-contribution";
+		window.location.replace(href);
+	});
+}
+function switchBetweenBoFo (){
+	$("body").on("click", "#fo", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		$("#menu-backoffice").show();
+		$("#menu-frontoffice").hide();
+		$(".backoffice").show();
+		$(".frontoffice").hide();
+	
+		return false;
+	});
+	
+	$("body").on("click", "#bo", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		$("#menu-backoffice").hide();
+		$("#menu-frontoffice").show();
+		$(".backoffice").hide();
+		$(".frontoffice").show();
+	
+		return false;
+	});
+}
+
+
+function onChangeCountrySearchHeader (){
+	$('.countrypickerHeader').on('change', function() {
+		button = $('div.countrypicker').find('button.btn');
+		def = $(this).find(':selected').data('country-code');
+		if (def == 'MA') {
+			$("#searchInput2").show();
+			$("#searchInput3").show();
+			$("#searchInput").css("width", "49.5%");
+			$(".form-recherche-header").attr("action", "societe-rechercher");
+		}
+		else {
+			$("#searchInput2").hide();
+			$("#searchInput3").hide();
+			$("#searchInput").css("width", "100%");
+			$(".form-recherche-header").attr("action", "societe-internationale-rechercher");
+		}
+
+		let value = this.value;
+		if (value != '') {
+			$(this).removeClass("val-form-erreur")
+			$(this).valid()
+		}
+		else {
+			$(this).valid()
+		}
+	});
+}
+function onChangeSearchTypeHeader (){
+	$('.typeRechercheHeader').on('change', function() {
+		var selectedItem = $(this).val();
+		if (selectedItem == 'denom') {
+			$(".searchInput").hide();
+			$("#searchInput1").show();
+			$("#searchInput4").show();
+
+			$(".form-recherche-header").attr("action", "societe-rechercher");
+		}
+		else if (selectedItem == 'psa') {
+			$(".searchInput").hide();
+			$("#searchInput2").show();
+			$("#searchInput4").show();
+
+			$(".form-recherche-header").attr("action", "societe-rechercher");
+		}
+		else if (selectedItem == 'marque') {
+			$(".searchInput").hide();
+			$("#searchInput3").show();
+			$("#searchInput4").show();
+
+			$(".form-recherche-header").attr("action", "societe-rechercher");
+		}
+		else if (selectedItem == 'international') {
+			$(".searchInput").hide();
+			$("#searchInput5").show();
+			$("#searchInput1").show();
+
+			$(".form-recherche-header").attr("action", "societe-internationale-rechercher");
+		}
+
+		let value = this.value;
+		if (value != '') {
+			$(this).removeClass("val-form-erreur")
+			$(this).valid()
+		}
+		else {
+			$(this).valid()
+		}
+	});
+}
+function onselectCountryChangeFormTypeMobile (){
+	//change flag on select change
+	$("body").on("change", ".form-recherche-accueil .countrypicker, .form-recherche-popup .countrypicker", function() {
+		button = $('div.countrypicker').find('button.btn');
+		def = $(this).find(':selected').data('country-code');
+		flagicon = "mosaic_img/flags/" + def.toLowerCase() + ".png";
+		button.css("background-image", "url('" + flagicon + "')");
+		button.addClass("paddingimportant");
+	
+		if (def == 'MA') {
+			$(".form-recherche-societe").attr("action", "societe-rechercher");
+		}
+		else {
+			$(".form-recherche-societe").attr("action", "societe-internationale-rechercher");
+		}
+	});
+}
+
+function onselectCountryChangeFormTypeWeb (){
+	//change flag on select change
+	$("body").on("change", ".form-recherche-denom #pays-box", function() {
+		def = $(this).find(':selected').data('country-code');
+
+		if (def == 'MA') {
+			$(".form-recherche-denom").attr("action", "societe-rechercher");
+		}
+		else {
+			$(".form-recherche-denom").attr("action", "societe-internationale-rechercher");
+		}
+	});
+}
+function onSubmitSearchHeader (){
+	$('.form-recherche-header').on('submit', function() {
+		// do validation here
+		if (!$(this).valid())
+			return false;
+	});
+}
+function validateFormSearchHeader (){
+	$(".form-recherche-header").validate({
+		rules: {
+			sDenomination: { required: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages:
+		{
+			sDenomination: { required: "Obligatoire*" }
+		}
+	});
+}
+
+/*--------------Menu notifs----------- */
+function markAllNotifsAsRead (){
+	$("body").on("click", ".all-mark-as-read", function(e) {
+		if (!userConnected())
+			return;
+	
+		$.ajax({
+			type: "POST",
+			url: "societe-eteindreallnotifications",
+			data: "",
+			success: function(data) {
+				document.location.reload();
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+function viewNotifSource (){
+	$("body").on("click", ".consulter-notification", function(e) {
+		if (!userConnected())
+			return;
+	
+		$this = $(this);
+	
+		id = $(this).attr('id').split("-");
+		var identifiant = id[0];
+		var type = id[1];
+		$.ajax({
+			type: "POST",
+			url: "societe-consulternotification",
+			data: "identifiant=" + identifiant + "&type=" + type,
+			success: function(data) {
+				console.log(" notication consulté: " + identifiant + " " + type);
+				document.location.href = $this.attr('href');
+			},
+			error: function(request,errorType,errorThrown) {
+				showNotificationPopup("error",messages.erreur_serveur);
+			}
+		}).always(function() { });
+	
+	});
+}
+
+/*--------------Global Actions----------- */
+function openReminderUpdateProfilePopup (width){
+	if (idMktUser != null && hideRappelPopup != null && hideRappelPopup == 0) {
+		$("#information-modal").iziModal({
+			overlayClose: false,
+			autoOpen: true,
+			overlayColor: 'rgba(0, 0, 0, 0.6)',
+			width: width,
+			zindex: 1060,
+			iframeHeight: 222,
+			timeout: 15000,
+			overlay: false,
+			bottom: 0,
+			top: 60,
+			timeoutProgressbar: true,
+			transitionIn: 'fadeInRight',
+			transitionOut: 'fadeOutRight',
+			onClosing: function() {
+				$.ajax({
+					url: "user-hiderappelpopup",
+					type: "POST",
+					data: "",
+					context: this,
+					success: function(data) {
+	
+					},
+					error: function(request, errorType, errorThrown) {
+						showNotificationPopup("error", messages.erreur_serveur);
+					}
+				});
+			}
+		});
+	}
+}
+function closeReminderUpdateProfilePopup (){
+	$("body").on("click", "#information-modal .closebtn", function() {
+		hideModal("information-modal");
+		$.ajax({
+			url: "user-hiderappelpopup",
+			type: "POST",
+			data: "",
+			context: this,
+			success: function(data) {
+	
+			},
+			error: function(request, errorType, errorThrown) {
+				showNotificationPopup("error", messages.erreur_serveur);
+			}
+		});
+	});
+}
+function manageServerActions (){
+	if (action != null && action == "registerSucces"){
+		showNotificationPopup('success', 'Merci de vous être inscrit sur charika.ma');
+//		setTimeout(function(){
+//			document.location.href = "accueil";
+//        }, 2000);
+		window.history.pushState({}, document.title, "accueil");
+	
+	}
+		
+
+	if (action != null && action == "registerFailed")
+		showNotificationPopup('error', 'Erreur lors de la validation de votre compte.');
+		
+	if (action != null && action == "registerNewsLetterSucces")
+		showNotificationPopup('success', 'Merci de vous être inscrit sur la newsletter charika.ma');
+
+	if (action != null && action == "registerNewsLetterFailed")
+		showNotificationPopup('error', 'Erreur lors de la validation de votre compte.');	
+
+	if (action != null && action == "registerEmailEntrepriseSucces")
+		showNotificationPopup('success', 'Email validé avec succés');
+
+	if (action != null && action == "registerEmailEntrepriseFailed")
+		showNotificationPopup('error', 'Erreur lors de la validation de votre compte.');
+
+	if (action != null && action == "recuperationPasswordFailed")
+		showNotificationPopup('error', 'Erreur lors de la r&eacute;nitialisation de mot de passe.');
+		
+	if (doDisconnect == 1) {
+		if (document.location.href.endsWith("user-disconnect") >= 0) {
+			document.location.href = "accueil";
+		}
+		else {
+			document.location.reload();
+		}
+	}	
+}
+
+function receiveMessageFromChild() {
+	hideModal("modal-user");
+
+	//	if ( arguments[3] == 1  ){
+	//		window.location.replace("accueil")
+	//	}
+	//	else {
+	//		reloadPage();
+	//	}
+
+	window.location.replace("accueil")
+
+	isLoggedIn = true;
+
+	$(".disconnected").hide();
+	$(".connected").show();
+//	$(".backoffice").hide();
+//	$(".contribution").show();
+}
+
+/*------------------------------------------ */
+function validateFormInternationlSearch (clazz){
+	$("."+clazz).validate({
+		ignore: ":hidden:not(.selectpicker)",
+		rules: {
+			sDenomination: { required: true },
+			sCountryCode: { required: true }
+		},
+		highlight: function(element) {
+			$(element).addClass("val-form-erreur");
+		},
+		unhighlight: function(element) {
+			$(element).removeClass("val-form-erreur");
+		},
+		messages:
+		{
+			sDenomination: { required: "Saisissez la dénomination" },
+			sCountryCode: { required: "Choisissez un pays" }
+		}
+	});
+	
+	$('body').on('change', "."+ clazz +" #country_code", function() {
+		let value = this.value;
+		if (value != '') {
+			$(this).removeClass("val-form-erreur")
+			$(this).valid()
+		}
+		else {
+			$(this).valid()
+		}
+	});
+}
+function submitFormInternationlSearch (clazz){
+	$('body').on('submit', "."+clazz, function() {
+		// do validation here
+		if (!$(this).valid())
+			return false;
+	});
+}
+function downloadReportExample (){
+	$("body").on("click", ".downloadReport, .downloadReportNational", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		var typeRaport = $(this).attr("reportType")
+		var href = "rapport-telecharger?typeRaport=" + typeRaport;
+		window.location.replace(href);
+	});
+}
+function goToServiceFichierProspects(){
+	$("body").on("click", ".btn-start-fichier-prospect", function(e) {
+		e.preventDefault();
+		$this = $(this);
+	
+		if (!userConnected()) return;
+	
+		var href = "fichier-creation";
+		window.location.replace(href);
+	});
+}
